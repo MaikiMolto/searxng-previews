@@ -89,23 +89,26 @@ document.addEventListener('DOMContentLoaded', () => {
             const searxngLines = searxngUrlsInput.value.split('\n').map(s => s.trim()).filter(Boolean);
             const backendIsHttp = url.startsWith('http://');
             const hasHttpsSearxng = searxngLines.some(u => u.startsWith('https://'));
+            let mixedContentWarning = false;
             if (backendIsHttp && hasHttpsSearxng) {
-                healthStatus.textContent = '⚠️';
-                statusEl.style.color = 'var(--warning-color)';
-                statusEl.textContent = '⚠️ Mixed Content risk: Your SearXNG uses HTTPS but the backend is HTTP. ' +
-                    'Browsers will block thumbnail requests. Use a reverse proxy with HTTPS for the backend (see guide below).';
-                // Don't auto-clear — this is important enough to stay visible
-                return;
+                mixedContentWarning = true;
             }
             healthStatus.textContent = '⏳';
             try {
                 const res = await fetch(`${url}/health`, { cache: 'no-store' });
-                healthStatus.textContent = res.ok ? '✅' : '❌';
-                statusEl.style.color = res.ok ? 'var(--success-color)' : 'var(--error-color)';
-                statusEl.textContent = res.ok
-                    ? '✅ Backend is reachable.'
-                    : `❌ Backend responded with status ${res.status}.`;
-                setTimeout(() => { statusEl.textContent = ''; }, 4000);
+                if (res.ok) {
+                    healthStatus.textContent = mixedContentWarning ? '⚠️' : '✅';
+                    statusEl.style.color = mixedContentWarning ? 'var(--warning-color)' : 'var(--success-color)';
+                    statusEl.textContent = mixedContentWarning
+                        ? '✅ Backend reachable — ⚠️ but Mixed Content: HTTPS SearXNG + HTTP backend. Browsers may block thumbnails. See reverse proxy guide below.'
+                        : '✅ Backend is reachable.';
+                    if (!mixedContentWarning) setTimeout(() => { statusEl.textContent = ''; }, 4000);
+                } else {
+                    healthStatus.textContent = '❌';
+                    statusEl.style.color = 'var(--error-color)';
+                    statusEl.textContent = `❌ Backend responded with status ${res.status}.`;
+                    setTimeout(() => { statusEl.textContent = ''; }, 4000);
+                }
             } catch (err) {
                 healthStatus.textContent = '❌';
                 statusEl.style.color = 'var(--error-color)';
