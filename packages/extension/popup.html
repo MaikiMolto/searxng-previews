@@ -27,6 +27,11 @@
             display: flex;
             justify-content: space-between;
             align-items: center;
+            gap: 10px;
+        }
+        .control-row label:first-child,
+        .control-row > span:first-child {
+            flex: 1;
         }
         .switch {
             position: relative;
@@ -87,6 +92,21 @@
         button.btn-secondary {
             background-color: #6c757d;
         }
+        select {
+            min-width: 110px;
+            padding: 6px 8px;
+            border-radius: 6px;
+            border: 1px solid #cfd4da;
+            background: #fff;
+            color: #333;
+            font-size: 13px;
+        }
+        .hint {
+            font-size: 12px;
+            color: #6c757d;
+            text-align: center;
+            margin-top: -6px;
+        }
     </style>
 </head>
 <body>
@@ -111,8 +131,27 @@
 
         <div class="control-row">
             <span>Thumbnail Position:</span>
-            <span id="positionText"></span>
+            <select id="positionSelect">
+                <option value="left">Left</option>
+                <option value="right">Right</option>
+                <option value="hover">Hover</option>
+                <option value="off">Off</option>
+            </select>
         </div>
+
+        <div class="control-row">
+            <span>Workers:</span>
+            <select id="workersSelect">
+                <option value="1">1</option>
+                <option value="2">2</option>
+                <option value="3">3</option>
+                <option value="4">4</option>
+                <option value="5">5</option>
+                <option value="6">6</option>
+            </select>
+        </div>
+
+        <div class="hint" id="popupHint">Quick controls — full setup in Settings/Dashboard</div>
 
         <div class="btn-row">
             <button id="openOptions">⚙️ Settings</button>
