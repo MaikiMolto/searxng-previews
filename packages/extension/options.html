@@ -1,0 +1,370 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SearXNG Previews · Settings</title>
+    <style>
+        :root {
+            --primary-color: #3050F0;
+            --primary-soft: rgba(48, 80, 240, 0.08);
+            --success-color: #28a745;
+            --error-color: #dc3545;
+            --warning-color: #f4a100;
+            --light-gray: #f4f4f4;
+            --border-color: #e1e4e8;
+            --dark-gray: #333;
+            --text-color: #212529;
+            --text-muted: #6a737d;
+            --bg-color: #fff;
+            --info-bg: #f6f8fa;
+        }
+        @media (prefers-color-scheme: dark) {
+            :root {
+                --light-gray: #2a2a2a;
+                --border-color: #3a3a3a;
+                --dark-gray: #ccc;
+                --text-color: #f1f1f1;
+                --text-muted: #8a8a8a;
+                --bg-color: #1e1e1e;
+                --info-bg: #252525;
+                --primary-soft: rgba(48, 80, 240, 0.18);
+            }
+        }
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+            margin: 0;
+            padding: 2em;
+            background-color: var(--bg-color);
+            color: var(--text-color);
+            max-width: 760px;
+            margin: 2em auto;
+            line-height: 1.5;
+        }
+        h1 {
+            color: var(--primary-color);
+            text-align: center;
+            border-bottom: 2px solid var(--light-gray);
+            padding-bottom: 0.5em;
+            margin-bottom: 0.2em;
+        }
+        .subtitle {
+            text-align: center;
+            color: var(--text-muted);
+            font-size: 14px;
+            margin-bottom: 2em;
+        }
+        .subtitle a { color: var(--primary-color); text-decoration: none; }
+        .subtitle a:hover { text-decoration: underline; }
+
+        .form-group {
+            margin-bottom: 1.8em;
+        }
+        label {
+            display: block;
+            margin-bottom: 0.5em;
+            font-weight: 600;
+            font-size: 15px;
+        }
+        .hint {
+            display: block;
+            font-size: 13px;
+            color: var(--text-muted);
+            margin-top: 0.4em;
+            line-height: 1.4;
+        }
+        .hint code {
+            background: var(--info-bg);
+            border: 1px solid var(--border-color);
+            border-radius: 4px;
+            padding: 1px 5px;
+            font-size: 12px;
+        }
+        input[type="text"], textarea, select {
+            width: 100%;
+            padding: 0.75em;
+            border: 1px solid var(--border-color);
+            border-radius: 6px;
+            box-sizing: border-box;
+            background-color: var(--bg-color);
+            color: var(--text-color);
+            font-family: 'SF Mono', Monaco, Consolas, 'Courier New', monospace;
+            font-size: 14px;
+        }
+        input[type="text"]:focus, textarea:focus {
+            outline: none;
+            border-color: var(--primary-color);
+            box-shadow: 0 0 0 3px var(--primary-soft);
+        }
+        input::placeholder, textarea::placeholder {
+            color: var(--text-muted);
+            opacity: 0.55;
+            font-style: italic;
+        }
+        textarea {
+            min-height: 90px;
+            resize: vertical;
+            line-height: 1.6;
+        }
+        .switch {
+            position: relative;
+            display: inline-block;
+            width: 60px;
+            height: 34px;
+        }
+        .switch input { display: none; }
+        .slider {
+            position: absolute;
+            cursor: pointer;
+            top: 0; left: 0; right: 0; bottom: 0;
+            background-color: #ccc;
+            transition: .4s;
+            border-radius: 34px;
+        }
+        .slider:before {
+            position: absolute;
+            content: "";
+            height: 26px; width: 26px;
+            left: 4px; bottom: 4px;
+            background-color: white;
+            transition: .4s;
+            border-radius: 50%;
+        }
+        input:checked + .slider { background-color: var(--primary-color); }
+        input:checked + .slider:before { transform: translateX(26px); }
+
+        .radio-group label {
+            display: inline-block;
+            margin-right: 1em;
+            font-weight: 400;
+            cursor: pointer;
+        }
+
+        .input-group {
+            display: flex;
+        }
+        .input-group input {
+            border-top-right-radius: 0;
+            border-bottom-right-radius: 0;
+        }
+        .input-group button {
+            border-top-left-radius: 0;
+            border-bottom-left-radius: 0;
+            border: 1px solid var(--border-color);
+            border-left: none;
+            background: var(--light-gray);
+            color: var(--text-color);
+            padding: 0 1.2em;
+            cursor: pointer;
+            font-size: 14px;
+        }
+        .input-group button:hover { background: var(--primary-soft); color: var(--primary-color); }
+        #healthStatus {
+            width: 20px;
+            height: 20px;
+            border-radius: 50%;
+            display: inline-block;
+            margin-left: 10px;
+            vertical-align: middle;
+        }
+        #save {
+            background-color: var(--primary-color);
+            color: white;
+            padding: 12px 20px;
+            border: none;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 15px;
+            font-weight: 600;
+            display: block;
+            width: 100%;
+            transition: opacity 0.2s, transform 0.1s;
+        }
+        #save:hover { opacity: 0.92; }
+        #save:active { transform: scale(0.98); }
+        #status {
+            text-align: center;
+            margin-top: 1em;
+            color: var(--success-color);
+            min-height: 1.2em;
+            font-size: 14px;
+        }
+        #thumbSize {
+            width: 100%;
+            accent-color: var(--primary-color);
+        }
+
+        /* Info boxes */
+        .info-box {
+            background: var(--info-bg);
+            border: 1px solid var(--border-color);
+            border-left: 4px solid var(--primary-color);
+            border-radius: 6px;
+            padding: 14px 18px;
+            margin: 1.5em 0;
+            font-size: 13.5px;
+        }
+        .info-box h3 {
+            margin: 0 0 0.6em;
+            font-size: 14.5px;
+            color: var(--primary-color);
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+        .info-box p { margin: 0.3em 0; }
+        .info-box code {
+            background: var(--bg-color);
+            border: 1px solid var(--border-color);
+            border-radius: 4px;
+            padding: 1px 5px;
+            font-size: 12.5px;
+        }
+        .info-box pre {
+            background: var(--bg-color);
+            border: 1px solid var(--border-color);
+            border-radius: 6px;
+            padding: 10px 12px;
+            font-size: 12.5px;
+            margin: 0.6em 0;
+            overflow-x: auto;
+        }
+        .info-box ul { margin: 0.4em 0 0.4em 1.2em; padding: 0; }
+        .info-box ul li { margin: 0.2em 0; }
+
+        section.settings-group {
+            margin-top: 2.5em;
+        }
+        section.settings-group > h2 {
+            font-size: 16px;
+            color: var(--text-muted);
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            margin: 0 0 1em;
+            padding-bottom: 0.4em;
+            border-bottom: 1px solid var(--border-color);
+        }
+    </style>
+</head>
+<body>
+
+    <h1>SearXNG Previews</h1>
+    <p class="subtitle">Thumbnail previews for SearXNG search results · <a href="https://github.com/your-repo/searxng-previews" target="_blank" rel="noopener">Documentation</a></p>
+
+    <div class="info-box">
+        <h3>🚀 Quick Start</h3>
+        <p>This extension needs a <strong>self-hosted Preview Service</strong> (backend) to generate thumbnails. It does <em>not</em> work on its own.</p>
+        <ul>
+            <li><strong>Install the backend</strong> via Docker: <a href="https://github.com/your-repo/searxng-previews" target="_blank" rel="noopener">github.com/your-repo/searxng-previews</a></li>
+            <li>Enter the <strong>backend URL</strong> and your <strong>SearXNG instance URL(s)</strong> below</li>
+            <li>Hit <em>Save</em> — done!</li>
+        </ul>
+    </div>
+
+    <div class="info-box">
+        <h3>💡 Tip: Find your SearXNG URL</h3>
+        <p>Open your SearXNG instance in a new tab, copy the address-bar URL (just the origin, e.g. <code>https://search.example.com</code> or <code>http://192.168.1.50:8080</code>) and paste it below. No trailing slash, no paths.</p>
+        <p><strong>Important:</strong> <code>http://</code> and <code>https://</code> are different origins. If you access the same instance via both, list both URLs.</p>
+    </div>
+
+    <section class="settings-group">
+        <h2>General</h2>
+
+        <div class="form-group">
+            <label for="enabled">Enable Extension</label>
+            <label class="switch">
+                <input type="checkbox" id="enabled">
+                <span class="slider"></span>
+            </label>
+            <small class="hint">Master switch. Turn this off to temporarily disable all preview rendering.</small>
+        </div>
+    </section>
+
+    <section class="settings-group">
+        <h2>Backend</h2>
+
+        <div class="form-group">
+            <label for="backendUrl">Preview Service URL <span id="healthStatus"></span></label>
+            <div class="input-group">
+                <input type="text" id="backendUrl" placeholder="e.g. http://192.168.1.50:3200 or https://previews.example.com">
+                <button id="checkHealth" type="button">Check</button>
+            </div>
+            <div style="margin-top: 0.6em;">
+                <button type="button" id="openDashboard" disabled style="display:inline-block;width:auto;padding:6px 14px;font-size:13px;background:#6c757d;color:#fff;border:none;border-radius:5px;cursor:pointer;opacity:0.4;" title="Set a backend URL first">📊 Open Dashboard</button>
+            </div>
+            <small class="hint">
+                URL of the self-hosted <code>searxng-previews</code> backend. Default port is <code>3200</code>.
+                Click <strong>Check</strong> to test if the backend is reachable.
+                <strong>Dashboard</strong> opens the backend's admin UI (cache management, worker pool, stats).
+                If you run both SearXNG and the preview service behind HTTPS, use <code>https://…</code> (see reverse-proxy guide at the bottom).
+            </small>
+        </div>
+    </section>
+
+    <section class="settings-group">
+        <h2>SearXNG Instances</h2>
+
+        <div class="form-group">
+            <label for="searxngUrls">Instance URLs (one per line)</label>
+            <textarea id="searxngUrls" placeholder="e.g.&#10;http://192.168.1.50:8080&#10;https://search.example.com&#10;http://searx.lan&#10;https://searx.example.com"></textarea>
+            <small class="hint">
+                The extension only activates on pages whose origin exactly matches one of these URLs.
+                If you access the same SearXNG instance via both HTTP and HTTPS (e.g. a LAN name and a public domain), list both.
+            </small>
+        </div>
+    </section>
+
+    <section class="settings-group">
+        <h2>Display</h2>
+
+        <div class="form-group">
+            <label>Thumbnail Position</label>
+            <div class="radio-group" id="position">
+                <label><input type="radio" name="position" value="left"> Left</label>
+                <label><input type="radio" name="position" value="right"> Right</label>
+                <label><input type="radio" name="position" value="hover"> Hover</label>
+                <label><input type="radio" name="position" value="off"> Off</label>
+            </div>
+            <small class="hint">
+                <strong>Left/Right:</strong> Preview appears next to the result text.
+                <strong>Hover:</strong> Only shows when you hover a result — takes less space.
+                <strong>Off:</strong> Disables rendering without turning off the extension.
+            </small>
+        </div>
+
+        <div class="form-group">
+            <label for="thumbSize">Thumbnail Size: <span id="thumbSizeValue">120</span>px</label>
+            <input type="range" id="thumbSize" min="80" max="240" step="10">
+            <small class="hint">
+                Width of the thumbnail in pixels. Height is automatically computed from the 4:3 aspect ratio.
+                Smaller = denser, more results per page. Bigger = easier to recognize sites.
+            </small>
+        </div>
+    </section>
+
+    <button id="save">Save Settings</button>
+    <div id="status"></div>
+
+    <div class="info-box" style="border-left-color: var(--warning-color); margin-top: 3em;">
+        <h3>🔒 Using a Reverse Proxy (Zoraxy / nginx / Caddy / Traefik)?</h3>
+        <p>If your SearXNG instance uses <code>https://</code>, the preview backend <strong>must also be served over HTTPS</strong>.
+        Otherwise browsers will block the requests (<em>Mixed Content</em>).</p>
+        <p>The recommended setup is to put the preview service behind a reverse proxy with its <em>own</em> hostname
+        (e.g. <code>https://previews.example.com</code>) and enter that URL above. Your proxy should forward to <code>http://&lt;internal-ip&gt;:3200</code>.</p>
+        <p><strong>Two essentials:</strong></p>
+        <ul>
+            <li><strong>CORS headers</strong> must pass through. The backend already sends <code>Access-Control-Allow-Origin: *</code>. Don't strip it in your proxy config.</li>
+            <li><strong>Mixed-Content:</strong> If your SearXNG uses <code>https://</code>, the backend URL must also be <code>https://</code>.</li>
+        </ul>
+        <p><strong>Minimal nginx example:</strong></p>
+<pre>location / {
+    proxy_pass http://192.0.2.10:3200;
+    proxy_set_header Host $host;
+    proxy_set_header X-Forwarded-For $remote_addr;
+    proxy_set_header X-Forwarded-Proto $scheme;
+}</pre>
+    </div>
+
+    <script src="options.js"></script>
+</body>
+</html>

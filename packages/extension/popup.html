@@ -1,0 +1,125 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>SearXNG Previews</title>
+    <style>
+        :root {
+            --primary-color: #3050F0;
+        }
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+            width: 280px;
+            padding: 15px;
+            color: #333;
+        }
+        .container {
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+        }
+        h3 {
+            margin: 0;
+            text-align: center;
+            color: var(--primary-color);
+        }
+        .control-row {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        .switch {
+            position: relative;
+            display: inline-block;
+            width: 50px;
+            height: 28px;
+        }
+        .switch input { display: none; }
+        .slider {
+            position: absolute;
+            cursor: pointer;
+            top: 0; left: 0; right: 0; bottom: 0;
+            background-color: #ccc;
+            transition: .4s;
+            border-radius: 28px;
+        }
+        .slider:before {
+            position: absolute;
+            content: "";
+            height: 20px; width: 20px;
+            left: 4px; bottom: 4px;
+            background-color: white;
+            transition: .4s;
+            border-radius: 50%;
+        }
+        input:checked + .slider { background-color: var(--primary-color); }
+        input:checked + .slider:before { transform: translateX(22px); }
+        
+        #backendStatusIndicator {
+            width: 12px;
+            height: 12px;
+            border-radius: 50%;
+            background-color: #ccc;
+            display: inline-block;
+            margin-right: 8px;
+        }
+        .btn-row {
+            display: flex;
+            gap: 8px;
+        }
+        button {
+            background-color: var(--primary-color);
+            color: white;
+            border: none;
+            padding: 8px 12px;
+            border-radius: 5px;
+            cursor: pointer;
+            flex: 1;
+            font-size: 13px;
+        }
+        button:hover {
+            opacity: 0.9;
+        }
+        button:disabled {
+            opacity: 0.4;
+            cursor: not-allowed;
+        }
+        button.btn-secondary {
+            background-color: #6c757d;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h3>SearXNG Previews</h3>
+
+        <div class="control-row">
+            <span>Extension Enabled</span>
+            <label class="switch">
+                <input type="checkbox" id="enabledToggle">
+                <span class="slider"></span>
+            </label>
+        </div>
+
+        <div class="control-row">
+            <span>Backend Status:</span>
+            <div>
+                <span id="backendStatusIndicator"></span>
+                <span id="backendStatusText">Checking...</span>
+            </div>
+        </div>
+
+        <div class="control-row">
+            <span>Thumbnail Position:</span>
+            <span id="positionText"></span>
+        </div>
+
+        <div class="btn-row">
+            <button id="openOptions">⚙️ Settings</button>
+            <button id="openDashboard" class="btn-secondary" disabled>📊 Dashboard</button>
+        </div>
+    </div>
+
+    <script src="popup.js"></script>
+</body>
+</html>

@@ -1,0 +1,32 @@
+# SearXNG Previews — Light (Preview Service only)
+# Requires a separate SearXNG instance.
+#
+# Usage:
+#   docker compose up -d
+#
+# Dashboard: http://<your-ip>:3200
+
+services:
+  preview-service:
+    image: ghcr.io/maikimolto/searxng-previews:latest
+    # For local builds instead of GHCR image, uncomment:
+    # build: ./packages/backend
+    ports:
+      - '3200:3000'
+    volumes:
+      - preview-cache:/app/cache
+    environment:
+      - PORT=3000
+      - CACHE_TTL_HOURS=168          # 7 days
+      - RATE_LIMIT_PER_MINUTE=30
+      - BLOCK_PRIVATE_IPS=true
+      - MAX_CACHE_SIZE_MB=500
+      - CONCURRENCY=6
+    restart: unless-stopped
+    deploy:
+      resources:
+        limits:
+          memory: 1G
+
+volumes:
+  preview-cache:

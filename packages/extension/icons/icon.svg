@@ -1,0 +1,48 @@
+<svg width="128" height="128" viewBox="0 0 128 128" xmlns="http://www.w3.org/2000/svg">
+  <defs>
+    <!-- Gradient von SearXNG-Blau zu dunklerem Blau -->
+    <linearGradient id="bgGradient" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#3050F0"/>
+      <stop offset="100%" stop-color="#1E2FA0"/>
+    </linearGradient>
+    
+    <!-- Weiße Lupe mit Schatten -->
+    <filter id="dropShadow" x="-20%" y="-20%" width="140%" height="140%">
+      <feDropShadow dx="2" dy="2" stdDeviation="2" flood-color="rgba(0,0,0,0.3)"/>
+    </filter>
+  </defs>
+  
+  <!-- Hintergrund mit abgerundeten Ecken -->
+  <rect x="0" y="0" width="128" height="128" rx="24" ry="24" fill="url(#bgGradient)"/>
+  
+  <!-- Thumbnail-Vorschau-Rechtecke (4 Stück, halbtransparent) -->
+  <rect x="30" y="30" width="28" height="20" rx="4" ry="4" fill="white" fill-opacity="0.3" filter="url(#dropShadow)"/>
+  <rect x="70" y="30" width="28" height="20" rx="4" ry="4" fill="white" fill-opacity="0.3" filter="url(#dropShadow)"/>
+  <rect x="30" y="78" width="28" height="20" rx="4" ry="4" fill="white" fill-opacity="0.3" filter="url(#dropShadow)"/>
+  <rect x="70" y="78" width="28" height="20" rx="4" ry="4" fill="white" fill-opacity="0.3" filter="url(#dropShadow)"/>
+  
+  <!-- Stilisierte Lupe (zentral) -->
+  <g transform="translate(64, 64)">
+    <!-- Lupe Griff -->
+    <rect x="30" y="-4" width="8" height="24" rx="2" ry="2" fill="white" stroke="white" stroke-width="2"/>
+    
+    <!-- Lupe Kreis -->
+    <circle cx="0" cy="0" r="24" fill="none" stroke="white" stroke-width="8"/>
+    
+    <!-- Lupe innen (leicht transparenter) -->
+    <circle cx="0" cy="0" r="18" fill="none" stroke="white" stroke-width="4" stroke-opacity="0.7"/>
+    
+    <!-- Kreuz im Inneren der Lupe (für Detail) -->
+    <line x1="-8" y1="0" x2="8" y2="0" stroke="white" stroke-width="3" stroke-opacity="0.5"/>
+    <line x1="0" y1="-8" x2="0" y2="8" stroke="white" stroke-width="3" stroke-opacity="0.5"/>
+  </g>
+  
+  <!-- Subtile Highlights auf den Thumbnails -->
+  <rect x="32" y="32" width="24" height="16" rx="2" ry="2" fill="white" fill-opacity="0.1"/>
+  <rect x="72" y="32" width="24" height="16" rx="2" ry="2" fill="white" fill-opacity="0.1"/>
+  <rect x="32" y="80" width="24" height="16" rx="2" ry="2" fill="white" fill-opacity="0.1"/>
+  <rect x="72" y="80" width="24" height="16" rx="2" ry="2" fill="white" fill-opacity="0.1"/>
+  
+  <!-- Glanz-Effekt (oben links) -->
+  <ellipse cx="32" cy="32" rx="16" ry="16" fill="white" fill-opacity="0.1"/>
+</svg>

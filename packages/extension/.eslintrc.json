@@ -1,0 +1,68 @@
+{
+  "env": {
+    "browser": true,
+    "es2022": true,
+    "webextensions": true
+  },
+  "extends": [
+    "eslint:recommended"
+  ],
+  "parserOptions": {
+    "ecmaVersion": "latest",
+    "sourceType": "module"
+  },
+  "globals": {
+    "chrome": "readonly"
+  },
+  "rules": {
+    "indent": ["error", 2],
+    "linebreak-style": ["error", "unix"],
+    "quotes": ["error", "single", { "avoidEscape": true }],
+    "semi": ["error", "always"],
+    "no-console": ["warn", { "allow": ["warn", "error", "info"] }],
+    "no-unused-vars": ["error", { "argsIgnorePattern": "^_" }],
+    "prefer-const": "error",
+    "arrow-body-style": ["error", "as-needed"],
+    "object-shorthand": "error",
+    "no-var": "error",
+    "prefer-template": "error",
+    "template-curly-spacing": ["error", "never"],
+    "no-trailing-spaces": "error",
+    "eol-last": ["error", "always"],
+    "comma-dangle": ["error", "always-multiline"],
+    "quote-props": ["error", "consistent-as-needed"],
+    "no-restricted-globals": [
+      "error",
+      {
+        "name": "alert",
+        "message": "Use console.log instead"
+      },
+      {
+        "name": "confirm",
+        "message": "Use custom modal instead"
+      },
+      {
+        "name": "prompt",
+        "message": "Use custom input instead"
+      }
+    ]
+  },
+  "overrides": [
+    {
+      "files": ["**/*.test.js", "**/*.spec.js"],
+      "env": {
+        "jest": true,
+        "node": true
+      },
+      "rules": {
+        "no-console": "off"
+      }
+    },
+    {
+      "files": ["background.js", "content.js"],
+      "rules": {
+        "no-undef": "off"
+      }
+    }
+  ]
+}

@@ -1,0 +1,21 @@
+{
+  "name": "@searxng-previews/backend",
+  "version": "1.0.0",
+  "description": "MVP Screenshot Service for SearXNG Result Previews",
+  "type": "module",
+  "main": "src/server.js",
+  "scripts": {
+    "start": "node src/server.js",
+    "dev": "node --watch src/server.js"
+  },
+  "dependencies": {
+    "fastify": "^5.2.2",
+    "playwright": "^1.52.0",
+    "lru-cache": "^11.1.0",
+    "sharp": "^0.33.5"
+  },
+  "engines": {
+    "node": ">=22.0.0"
+  },
+  "license": "MIT"
+}

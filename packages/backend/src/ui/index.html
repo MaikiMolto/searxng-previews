@@ -1,0 +1,1219 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SearXNG Preview Service Dashboard</title>
+    <style>
+        :root {
+            --bg-color: #1a1a2e;
+            --card-color: #16213e;
+            --accent-color: #3050F0;
+            --text-color: #e0e0e0;
+            --text-secondary: #a0a0a0;
+            --border-color: rgba(255, 255, 255, 0.1);
+            --subtle-bg: rgba(0, 0, 0, 0.15);
+            --border-radius: 12px;
+            --font-family: system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, 'Open Sans', 'Helvetica Neue', sans-serif;
+        }
+        body.theme-light {
+            --bg-color: #f4f5f7;
+            --card-color: #ffffff;
+            --accent-color: #2a49d8;
+            --text-color: #1a1a2e;
+            --text-secondary: #6b7280;
+            --border-color: rgba(0, 0, 0, 0.08);
+            --subtle-bg: rgba(0, 0, 0, 0.04);
+        }
+        body.theme-light .card { box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06); }
+        body.theme-light .card:hover { box-shadow: 0 6px 16px rgba(48, 80, 240, 0.15); }
+        body.theme-light .pool-slot { background: rgba(0,0,0,0.05); border-color: rgba(0,0,0,0.08); }
+        body.theme-light .pool-slot.enabled { background: #e0e7ff; border-color: rgba(48,80,240,0.3); }
+        body.theme-light .pool-sparkline-grid { stroke: rgba(0,0,0,0.08); }
+        body.theme-light .pool-tooltip { background: rgba(255,255,255,0.98); color: #1a1a2e; border-color: rgba(0,0,0,0.12); }
+        body.theme-light .form-group input,
+        body.theme-light .form-group select { background: #f9fafb; border-color: var(--border-color); color: var(--text-color); }
+        body.theme-light .toggle-switch .slider { background: #d1d5db; }
+        body.theme-light .section h2 { border-bottom-color: var(--border-color); }
+
+        /* Header controls */
+        .header-controls {
+            display: flex;
+            gap: 8px;
+            align-items: center;
+        }
+        .header-btn {
+            background: var(--card-color);
+            border: 1px solid var(--border-color);
+            color: var(--text-color);
+            width: 40px;
+            height: 40px;
+            border-radius: 10px;
+            font-size: 18px;
+            cursor: pointer;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            transition: transform 0.15s, background 0.2s;
+            padding: 0;
+        }
+        .header-btn:hover { transform: translateY(-2px); }
+
+        /* Language dropdown */
+        .lang-select {
+            background: var(--card-color);
+            color: var(--text-color);
+            border: 1px solid var(--border-color);
+            border-radius: 8px;
+            padding: 6px 10px;
+            font-size: 14px;
+            font-family: var(--font-family);
+            cursor: pointer;
+            transition: border-color 0.2s;
+        }
+        .lang-select:hover { border-color: var(--accent-color); }
+        .lang-select:focus { outline: none; border-color: var(--accent-color); box-shadow: 0 0 0 2px rgba(48, 80, 240, 0.2); }
+        .lang-select option { background: var(--card-color); color: var(--text-color); }
+
+        /* Info tooltip */
+        .info-tip {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            width: 16px;
+            height: 16px;
+            border-radius: 50%;
+            background: var(--subtle-bg);
+            border: 1px solid var(--border-color);
+            color: var(--text-secondary);
+            font-size: 10px;
+            font-weight: 600;
+            margin-left: 6px;
+            cursor: help;
+            position: relative;
+            vertical-align: middle;
+        }
+        .info-tip:hover { color: var(--accent-color); border-color: var(--accent-color); }
+        .info-tip:hover::after {
+            content: attr(data-tip);
+            position: absolute;
+            bottom: calc(100% + 8px);
+            left: 50%;
+            transform: translateX(-50%);
+            background: rgba(10,12,24,0.98);
+            color: #fff;
+            padding: 8px 12px;
+            border-radius: 6px;
+            font-size: 12px;
+            font-weight: 400;
+            white-space: normal;
+            width: 260px;
+            z-index: 100;
+            box-shadow: 0 4px 16px rgba(0,0,0,0.3);
+            text-align: left;
+            line-height: 1.4;
+            pointer-events: none;
+        }
+        .info-tip:hover::before {
+            content: '';
+            position: absolute;
+            bottom: 100%;
+            left: 50%;
+            transform: translateX(-50%);
+            border: 6px solid transparent;
+            border-top-color: rgba(10,12,24,0.98);
+            margin-bottom: -4px;
+            z-index: 101;
+        }
+        body {
+            background-color: var(--bg-color);
+            color: var(--text-color);
+            font-family: var(--font-family);
+            margin: 0;
+            padding: 24px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+        .container {
+            width: 100%;
+            max-width: 1200px;
+        }
+        header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 32px;
+            padding: 0 16px;
+        }
+        header h1 {
+            font-size: 24px;
+            margin: 0;
+            display: flex;
+            align-items: center;
+        }
+        header h1 svg {
+            margin-right: 12px;
+            width: 32px;
+            height: 32px;
+            fill: var(--accent-color);
+        }
+        .header-info {
+            text-align: right;
+        }
+        .header-info p {
+            margin: 0;
+            font-size: 14px;
+            color: var(--text-secondary);
+        }
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 24px;
+            margin-bottom: 32px;
+        }
+        .card {
+            background-color: var(--card-color);
+            border-radius: var(--border-radius);
+            padding: 24px;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+            transition: transform 0.2s ease-in-out, box-shadow 0.2s ease-in-out;
+        }
+        .card:hover {
+            transform: translateY(-4px);
+            box-shadow: 0 8px 24px rgba(48, 80, 240, 0.2);
+        }
+        .card h2 {
+            margin: 0 0 8px 0;
+            font-size: 16px;
+            color: var(--text-secondary);
+            font-weight: 500;
+        }
+        .card .value {
+            font-size: 36px;
+            font-weight: 700;
+            color: var(--text-color);
+        }
+        .card .unit {
+            font-size: 18px;
+            color: var(--text-secondary);
+            margin-left: 8px;
+        }
+        .section {
+            background-color: var(--card-color);
+            border-radius: var(--border-radius);
+            padding: 24px;
+            margin-bottom: 32px;
+        }
+        .section h2 {
+            margin-top: 0;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+            padding-bottom: 16px;
+            margin-bottom: 24px;
+        }
+        .settings-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 24px;
+        }
+        .form-group {
+            display: flex;
+            flex-direction: column;
+        }
+        .form-group label {
+            margin-bottom: 8px;
+            color: var(--text-secondary);
+        }
+        .form-group input, .form-group select {
+            background-color: var(--bg-color);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 8px;
+            padding: 12px;
+            color: var(--text-color);
+            font-size: 16px;
+        }
+        .toggle-switch {
+            display: flex;
+            align-items: center;
+        }
+        .toggle-switch label {
+            margin: 0;
+        }
+        .toggle-switch input {
+            height: 0;
+            width: 0;
+            visibility: hidden;
+        }
+        .toggle-switch .slider {
+            cursor: pointer;
+            width: 50px;
+            height: 26px;
+            background-color: var(--bg-color);
+            border-radius: 26px;
+            position: relative;
+            transition: background-color 0.2s;
+            margin-left: 16px;
+        }
+        .toggle-switch .slider:before {
+            content: "";
+            position: absolute;
+            height: 20px;
+            width: 20px;
+            left: 3px;
+            bottom: 3px;
+            background-color: white;
+            border-radius: 50%;
+            transition: transform 0.2s;
+        }
+        .toggle-switch input:checked + .slider {
+            background-color: var(--accent-color);
+        }
+        .toggle-switch input:checked + .slider:before {
+            transform: translateX(24px);
+        }
+        .btn {
+            background-color: var(--accent-color);
+            color: white;
+            border: none;
+            padding: 12px 24px;
+            border-radius: 8px;
+            font-size: 16px;
+            cursor: pointer;
+            transition: background-color 0.2s;
+        }
+        .btn:hover {
+            background-color: #4a6dff;
+        }
+        .btn-danger {
+            background-color: #e53935;
+        }
+        .btn-danger:hover {
+            background-color: #f44336;
+        }
+        .actions {
+            margin-top: 24px;
+            display: flex;
+            gap: 16px;
+        }
+        .thumbnail-gallery {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+            gap: 16px;
+        }
+        .thumbnail-item {
+            position: relative;
+            cursor: pointer;
+            border-radius: 8px;
+            overflow: hidden;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
+        }
+        .thumbnail-item img {
+            width: 100%;
+            height: auto;
+            display: block;
+            transition: transform 0.2s;
+        }
+        .thumbnail-item:hover img {
+            transform: scale(1.05);
+        }
+        .thumbnail-placeholder {
+            width: 100%;
+            aspect-ratio: 240 / 180;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            background: linear-gradient(135deg, rgba(48,80,240,0.1) 0%, rgba(48,80,240,0.02) 100%);
+            border: 2px dashed var(--border-color);
+            color: var(--text-secondary);
+            text-align: center;
+            padding: 12px;
+        }
+        body.theme-light .thumbnail-placeholder {
+            background: linear-gradient(135deg, rgba(48,80,240,0.08) 0%, rgba(48,80,240,0.02) 100%);
+        }
+        .thumbnail-placeholder .ph-icon { font-size: 32px; line-height: 1; }
+        .thumbnail-placeholder .ph-label {
+            font-size: 11px;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+        .thumbnail-placeholder .ph-hint {
+            font-size: 10px;
+            opacity: 0.7;
+            line-height: 1.2;
+        }
+        .thumbnail-placeholder.is-error {
+            background: linear-gradient(135deg, rgba(255,94,94,0.12) 0%, rgba(255,94,94,0.02) 100%);
+            border-color: rgba(255,94,94,0.4);
+        }
+        .thumb-del-btn {
+            position: absolute;
+            top: 6px;
+            right: 6px;
+            width: 26px;
+            height: 26px;
+            border-radius: 50%;
+            border: none;
+            background: rgba(0,0,0,0.7);
+            color: #fff;
+            font-size: 14px;
+            font-weight: 700;
+            cursor: pointer;
+            opacity: 0;
+            transition: opacity 0.2s, background 0.2s, transform 0.15s;
+            z-index: 2;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 0;
+        }
+        .thumbnail-item:hover .thumb-del-btn { opacity: 1; }
+        .thumb-del-btn:hover { background: #ff5e5e; transform: scale(1.12); }
+        .btn.btn-secondary {
+            background: var(--card-color);
+            color: var(--text-color);
+            border: 1px solid var(--border-color);
+        }
+        .btn.btn-secondary:hover { border-color: var(--accent-color); color: var(--accent-color); }
+        .thumbnail-item .overlay {
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            background: linear-gradient(to top, rgba(0,0,0,0.8), transparent);
+            color: white;
+            padding: 12px;
+            font-size: 12px;
+            opacity: 0;
+            transform: translateY(100%);
+            transition: opacity 0.2s, transform 0.2s;
+        }
+        .thumbnail-item:hover .overlay {
+            opacity: 1;
+            transform: translateY(0);
+        }
+        .thumbnail-item .overlay p {
+            margin: 0;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+
+        #lightbox {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0,0,0,0.8);
+            display: none;
+            justify-content: center;
+            align-items: center;
+            z-index: 1000;
+        }
+        #lightbox img {
+            max-width: 90%;
+            max-height: 90%;
+            border-radius: 8px;
+        }
+        /* Worker pool card — A+B combined — full width */
+        .pool-card { grid-column: 1 / -1; }
+        .pool-slider-row {
+            display: flex;
+            align-items: center;
+            gap: 16px;
+            margin: 12px 0 16px 0;
+            padding: 12px 16px;
+            background: rgba(0,0,0,0.15);
+            border-radius: 8px;
+        }
+        .pool-slider-row label {
+            color: var(--text-secondary);
+            font-size: 14px;
+            white-space: nowrap;
+        }
+        .pool-slider-row input[type=range] {
+            flex: 1;
+            accent-color: var(--accent-color);
+        }
+        .pool-slider-row .pool-slider-value {
+            font-size: 18px;
+            font-weight: 700;
+            color: var(--text-color);
+            min-width: 48px;
+            text-align: right;
+            transition: color 0.3s;
+        }
+        .pool-slots {
+            display: flex;
+            gap: 4px;
+            margin: 8px 0 12px 0;
+        }
+        .pool-slot {
+            flex: 1;
+            height: 28px;
+            border-radius: 6px;
+            background: rgba(255,255,255,0.05);
+            border: 1px solid rgba(255,255,255,0.08);
+            transition: all 0.25s ease;
+        }
+        .pool-slot.enabled {
+            background: #2a3155;
+            border-color: rgba(48,80,240,0.25);
+        }
+        .pool-slot.active {
+            background: var(--accent-color);
+            border-color: var(--accent-color);
+            box-shadow: 0 0 12px rgba(48,80,240,0.7);
+            animation: slot-pulse 1.2s ease-in-out infinite;
+        }
+        .pool-slot.disabled {
+            opacity: 0.25;
+        }
+        @keyframes slot-pulse {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.65; }
+        }
+        .pool-meta {
+            display: flex;
+            gap: 12px;
+            align-items: center;
+            margin: 8px 0 4px 0;
+        }
+        .pool-meta .pool-current {
+            font-size: 28px;
+            font-weight: 700;
+            color: var(--text-color);
+        }
+        .pool-meta .pool-label {
+            font-size: 13px;
+            color: var(--text-secondary);
+        }
+        .queue-badge {
+            background: #e53935;
+            color: white;
+            padding: 3px 10px;
+            border-radius: 12px;
+            font-size: 12px;
+            font-weight: 600;
+            margin-left: auto;
+            animation: queue-pulse 1s ease-in-out infinite;
+        }
+        @keyframes queue-pulse {
+            0%, 100% { transform: scale(1); }
+            50% { transform: scale(1.08); }
+        }
+        .queue-badge.hidden { display: none; }
+        .pool-sparkline {
+            width: 100%;
+            height: 50px;
+            margin: 8px 0 4px 0;
+            display: block;
+            cursor: crosshair;
+        }
+        .pool-sparkline-area { fill: rgba(48,80,240,0.15); }
+        .pool-sparkline-line { fill: none; stroke: var(--accent-color); stroke-width: 2; stroke-linejoin: round; stroke-linecap: round; }
+        .pool-sparkline-queue { fill: none; stroke: #e53935; stroke-width: 1.5; stroke-dasharray: 3,2; }
+        .pool-sparkline-grid { stroke: rgba(255,255,255,0.06); stroke-width: 1; }
+        .pool-sparkline-cursor { stroke: rgba(255,255,255,0.35); stroke-width: 1; pointer-events: none; }
+        .pool-tooltip {
+            position: absolute;
+            background: rgba(10,12,24,0.95);
+            border: 1px solid rgba(255,255,255,0.1);
+            border-radius: 6px;
+            padding: 6px 10px;
+            font-size: 12px;
+            color: var(--text-color);
+            pointer-events: none;
+            white-space: nowrap;
+            z-index: 10;
+            transform: translate(-50%, -120%);
+            display: none;
+        }
+        .pool-percentiles {
+            display: flex;
+            gap: 20px;
+            font-size: 12px;
+            color: var(--text-secondary);
+            padding-top: 8px;
+            border-top: 1px solid rgba(255,255,255,0.06);
+        }
+        .pool-percentiles b {
+            color: var(--text-color);
+            font-weight: 600;
+        }
+        .pool-percentiles .perc-idle { opacity: 0.5; }
+    </style>
+</head>
+<body>
+
+    <div class="container">
+        <header>
+            <h1>
+                <svg viewBox="0 0 24 24"><path d="M20 4v12H5.17L4 17.17V4h16m0-2H4c-1.1 0-2 .9-2 2v15.51c0 .89 1.08 1.34 1.71.71L6 18h14c1.1 0 2-.9 2-2V4c0-1.1-.9-2-2-2z"/><path d="M7 12l2.5-3.5L12 12l2.5-3.5L17 12H7z"/></svg>
+                SearXNG Preview Service
+            </h1>
+            <div class="header-controls">
+                <div class="header-info" style="text-align: right; margin-right: 8px;">
+                    <p id="version">v1.0.0</p>
+                    <p id="uptime" data-i18n="uptime">Uptime: --:--:--</p>
+                </div>
+                <select class="lang-select" id="lang-select" aria-label="Language">
+                    <option value="de">🇩🇪 Deutsch</option>
+                    <option value="en">🇬🇧 English</option>
+                </select>
+                <button class="header-btn" id="theme-toggle" title="Theme">🌙</button>
+            </div>
+        </header>
+
+        <main>
+            <div class="stats-grid">
+                <div class="card">
+                    <h2><span data-i18n="stat.thumbnails">📸 Thumbnails im Cache</span><span class="info-tip" data-i18n-tip="tip.thumbnails" data-tip="">?</span></h2>
+                    <p><span class="value" id="stat-entries">0</span></p>
+                </div>
+                <div class="card">
+                    <h2><span data-i18n="stat.storage">💾 Speicherverbrauch</span><span class="info-tip" data-i18n-tip="tip.storage" data-tip="">?</span></h2>
+                    <p><span class="value" id="stat-size">0</span><span class="unit">MB</span></p>
+                </div>
+                <div class="card">
+                    <h2><span data-i18n="stat.renderTime">⏱️ Renderzeit (Ø)</span><span class="info-tip" data-i18n-tip="tip.renderTime" data-tip="">?</span></h2>
+                    <p><span class="value" id="stat-render-time">0</span><span class="unit">ms</span></p>
+                </div>
+                <div class="card">
+                    <h2><span data-i18n="stat.hitRate">🔄 Cache-Hit-Rate</span><span class="info-tip" data-i18n-tip="tip.hitRate" data-tip="">?</span></h2>
+                    <p><span class="value" id="stat-hit-rate">0</span><span class="unit">%</span></p>
+                </div>
+                <div class="card pool-card" style="position:relative;">
+                    <h2><span data-i18n="pool.title">👷 Worker Pool</span><span class="info-tip" data-i18n-tip="tip.workers" data-tip="">?</span></h2>
+                    <div class="pool-slots" id="pool-slots"></div>
+                    <div class="pool-meta">
+                        <span class="pool-current" id="pool-current">0/0</span>
+                        <span class="pool-label" data-i18n="pool.active">aktiv</span>
+                        <span class="queue-badge hidden" id="queue-badge">0 wartend</span>
+                    </div>
+                    <div class="pool-slider-row">
+                        <label for="workers" data-i18n="pool.sliderLabel">Worker (parallel)</label>
+                        <input type="range" id="workers" min="1" max="6" step="1" value="6">
+                        <span class="pool-slider-value" id="workersValue">6</span>
+                    </div>
+                    <svg class="pool-sparkline" id="pool-sparkline" viewBox="0 0 200 50" preserveAspectRatio="none"></svg>
+                    <div class="pool-percentiles" id="pool-percentiles">
+                        <span>⏱️ p50: <b id="perc-p50">—</b><span class="info-tip" data-i18n-tip="tip.p50" data-tip="">?</span></span>
+                        <span>⚡ p95: <b id="perc-p95">—</b><span class="info-tip" data-i18n-tip="tip.p95" data-tip="">?</span></span>
+                        <span class="perc-idle"><span id="perc-count">0 samples</span><span class="info-tip" data-i18n-tip="tip.samples" data-tip="">?</span></span>
+                    </div>
+                    <div class="pool-tooltip" id="pool-tooltip"></div>
+                </div>
+            </div>
+
+            <div class="section">
+                <h2 data-i18n="settings.title">Einstellungen</h2>
+                <div class="settings-grid">
+                    <div class="form-group">
+                        <label for="ttl">
+                            <span data-i18n="settings.ttl">Aufbewahrungsdauer</span>
+                            <span class="info-tip" data-i18n-tip="tip.ttl" data-tip="">?</span>
+                        </label>
+                        <select id="ttl">
+                            <option value="24" data-i18n="ttl.h24">24 Stunden</option>
+                            <option value="48" data-i18n="ttl.h48">48 Stunden</option>
+                            <option value="168" data-i18n="ttl.d7">7 Tage</option>
+                            <option value="336" data-i18n="ttl.d14">14 Tage</option>
+                            <option value="720" data-i18n="ttl.d30">30 Tage</option>
+                            <option value="2160" data-i18n="ttl.d90">90 Tage</option>
+                            <option value="4320" data-i18n="ttl.d180">180 Tage</option>
+                            <option value="8760" data-i18n="ttl.d365">365 Tage</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label for="rateLimit">
+                            <span data-i18n="settings.rateLimit">Rate-Limit (req/min)</span>
+                            <span class="info-tip" data-i18n-tip="tip.rateLimit" data-tip="">?</span>
+                        </label>
+                        <input type="number" id="rateLimit" min="0">
+                    </div>
+                    <div class="form-group">
+                        <label for="blockPrivateIps">
+                            <span data-i18n="settings.blockIps">Private IPs blockieren</span>
+                            <span class="info-tip" data-i18n-tip="tip.blockIps" data-tip="">?</span>
+                        </label>
+                        <div class="toggle-switch">
+                            <input type="checkbox" id="blockPrivateIps">
+                            <label class="slider" for="blockPrivateIps"></label>
+                        </div>
+                    </div>
+                </div>
+                 <div class="actions">
+                    <button id="save-settings" class="btn" data-i18n="action.save">Speichern</button>
+                </div>
+            </div>
+
+            <div class="section">
+                <h2 data-i18n="cache.title">Cache-Management</h2>
+                <div class="actions">
+                    <button id="clear-cache" class="btn btn-danger" data-i18n="action.clearCache">Cache leeren</button>
+                    <button id="toggle-showall" class="btn btn-secondary" data-i18n="action.showAll">Alle anzeigen</button>
+                    <span id="cache-count-info" style="margin-left: auto; color: var(--text-secondary); font-size: 13px; align-self: center;"></span>
+                </div>
+                <h3 style="margin-top: 32px;" id="cache-recent-heading" data-i18n="cache.recent">Letzte 20 Screenshots</h3>
+                <div id="thumbnail-gallery" class="thumbnail-gallery">
+                    <!-- Thumbnails will be injected here -->
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <div id="lightbox">
+        <img src="" alt="Full size preview">
+    </div>
+
+    <script>
+        // === i18n translations ===
+        const I18N = {
+            de: {
+                'uptime': 'Laufzeit: --:--:--',
+                'stat.thumbnails': '📸 Thumbnails im Cache',
+                'stat.storage': '💾 Speicherverbrauch',
+                'stat.renderTime': '⏱️ Renderzeit (Ø)',
+                'stat.hitRate': '🔄 Cache-Hit-Rate',
+                'pool.title': '👷 Worker Pool',
+                'pool.active': 'aktiv',
+                'pool.sliderLabel': 'Worker (parallel)',
+                'pool.queued': 'wartend',
+                'settings.title': 'Einstellungen',
+                'settings.ttl': 'Aufbewahrungsdauer',
+                'settings.rateLimit': 'Rate-Limit (req/min)',
+                'settings.blockIps': 'Private IPs blockieren',
+                'cache.title': 'Cache-Verwaltung',
+                'cache.recent': 'Letzte 20 Screenshots',
+                'action.save': 'Speichern',
+                'action.clearCache': 'Cache leeren',
+                'action.saved': 'Einstellungen gespeichert!',
+                'action.confirmClear': 'Sind Sie sicher, dass Sie den gesamten Cache leeren möchten?',
+                'action.deleted': 'Einträge gelöscht.',
+                'action.showAll': 'Alle anzeigen',
+                'action.showRecent': 'Nur letzte 20',
+                'action.deleteOne': 'Diesen Eintrag löschen',
+                'action.confirmDelete': 'Diesen Cache-Eintrag wirklich löschen?',
+                'action.deleteFailed': 'Löschen fehlgeschlagen',
+                'cache.all': 'Alle Screenshots',
+                'cache.showing': 'Zeige',
+                'cache.entries': 'Einträge',
+                'ttl.h24': '24 Stunden', 'ttl.h48': '48 Stunden',
+                'ttl.d7': '7 Tage', 'ttl.d14': '14 Tage',
+                'ttl.d30': '30 Tage', 'ttl.d90': '90 Tage',
+                'ttl.d180': '180 Tage', 'ttl.d365': '365 Tage',
+                'tip.thumbnails': 'Anzahl der Screenshots, die aktuell im Cache liegen und sofort ausgeliefert werden können.',
+                'tip.storage': 'Plattenspeicher, den alle gecachten Thumbnails belegen. Wird bei jedem neuen Screenshot aktualisiert.',
+                'tip.renderTime': 'Durchschnittliche Zeit zum Generieren eines NEUEN Thumbnails (ohne Cache-Hits). Cache-Hits liefern typisch in <200ms.',
+                'tip.hitRate': 'Anteil der Anfragen, die aus dem Cache kamen (keine echte Browser-Arbeit nötig). Höher = schneller + effizienter.',
+                'tip.workers': 'Anzahl der parallel laufenden Browser-Instanzen. Mehr Worker = mehr Thumbnails gleichzeitig. Hinweis: Dein Browser lädt aber meist nur 6 parallel (HTTP/1.1-Limit).',
+                'tip.ttl': 'Wie lange ein gecachter Screenshot gültig bleibt. Danach wird er bei der nächsten Anfrage neu erzeugt. Länger = mehr Speicher, aber weniger CPU.',
+                'tip.rateLimit': 'Maximale Anzahl Thumbnail-Anfragen pro Minute pro IP. Schützt vor DoS-Angriffen und begrenzt Ressourcen-Verbrauch. 0 = kein Limit.',
+                'tip.blockIps': 'Verhindert Anfragen an interne IPs (192.168.x, 10.x, 127.0.0.1). Schützt dein Heimnetz vor SSRF-Angriffen, wenn der Service öffentlich erreichbar ist.',
+                'tip.p50': 'Median-Render-Zeit: 50% aller Thumbnails werden schneller als dieser Wert erzeugt. Typisch-Wert für „normale“ Anfragen. Cache-Hits zählen hier NICHT — nur echte Renders.',
+                'tip.p95': '95. Perzentil: Nur 5% aller Renders sind langsamer. Zeigt dir die „Worst-Case“-Latenz für träge Seiten (Cookie-Banner, große Shop-Sites). Wenn p95 über 10s steigt → Timeout prüfen.',
+                'tip.samples': 'Anzahl der Renders, die in die Berechnung der Percentile einfließen. Nur die letzten 100 werden berücksichtigt — so passt sich die Statistik schnell an Änderungen an.',
+                'placeholder.blocked': 'Bot-Schutz aktiv',
+                'placeholder.error': 'Fehler / Timeout',
+                'placeholder.hint': 'Nutzer sieht Favicon statt Screenshot'
+            },
+            en: {
+                'uptime': 'Uptime: --:--:--',
+                'stat.thumbnails': '📸 Thumbnails in cache',
+                'stat.storage': '💾 Storage used',
+                'stat.renderTime': '⏱️ Render time (avg)',
+                'stat.hitRate': '🔄 Cache hit rate',
+                'pool.title': '👷 Worker Pool',
+                'pool.active': 'active',
+                'pool.sliderLabel': 'Workers (parallel)',
+                'pool.queued': 'queued',
+                'settings.title': 'Settings',
+                'settings.ttl': 'Retention',
+                'settings.rateLimit': 'Rate limit (req/min)',
+                'settings.blockIps': 'Block private IPs',
+                'cache.title': 'Cache management',
+                'cache.recent': 'Last 20 screenshots',
+                'action.save': 'Save',
+                'action.clearCache': 'Clear cache',
+                'action.saved': 'Settings saved!',
+                'action.confirmClear': 'Are you sure you want to clear the entire cache?',
+                'action.showAll': 'Show all',
+                'action.showRecent': 'Only last 20',
+                'action.deleteOne': 'Delete this entry',
+                'action.confirmDelete': 'Really delete this cache entry?',
+                'action.deleteFailed': 'Delete failed',
+                'cache.all': 'All screenshots',
+                'cache.showing': 'Showing',
+                'cache.entries': 'entries',
+                'action.deleted': 'entries deleted.',
+                'ttl.h24': '24 hours', 'ttl.h48': '48 hours',
+                'ttl.d7': '7 days', 'ttl.d14': '14 days',
+                'ttl.d30': '30 days', 'ttl.d90': '90 days',
+                'ttl.d180': '180 days', 'ttl.d365': '365 days',
+                'tip.thumbnails': 'Number of screenshots currently in cache, ready to serve instantly.',
+                'tip.storage': 'Disk space used by all cached thumbnails. Updates as new screenshots are added.',
+                'tip.renderTime': 'Average time to render a NEW thumbnail (excluding cache hits). Cache hits typically return in <200ms.',
+                'tip.hitRate': 'Percentage of requests served from cache (no browser work needed). Higher = faster + more efficient.',
+                'tip.workers': 'Number of parallel browser instances. More workers = more simultaneous thumbnails. Note: your browser typically loads only 6 in parallel (HTTP/1.1 limit).',
+                'tip.ttl': 'How long a cached screenshot stays valid. After that it will be re-rendered on next request. Longer = more storage, less CPU.',
+                'tip.rateLimit': 'Max thumbnail requests per minute per IP. Protects against DoS and limits resource consumption. 0 = no limit.',
+                'tip.blockIps': 'Prevents requests to internal IPs (192.168.x, 10.x, 127.0.0.1). Protects your home network from SSRF attacks if the service is publicly exposed.',
+                'tip.p50': 'Median render time: 50% of all thumbnails are rendered faster than this. Typical value for „normal“ requests. Cache hits are NOT counted — only real renders.',
+                'tip.p95': '95th percentile: Only 5% of renders are slower. Shows your „worst case“ latency for slow sites (cookie banners, large shops). If p95 goes above 10s → check timeout.',
+                'tip.samples': 'Number of renders counted in the percentile calculation. Only the last 100 are considered — so stats adapt quickly to changes.',
+                'placeholder.blocked': 'Bot shield active',
+                'placeholder.error': 'Error / Timeout',
+                'placeholder.hint': 'Users see favicon instead of screenshot'
+            }
+        };
+
+        let currentLang = localStorage.getItem('searxng-prev-lang') || (navigator.language.startsWith('de') ? 'de' : 'en');
+
+        function applyLanguage(lang) {
+            currentLang = lang;
+            localStorage.setItem('searxng-prev-lang', lang);
+            const dict = I18N[lang] || I18N.de;
+            document.documentElement.lang = lang;
+            document.querySelectorAll('[data-i18n]').forEach(el => {
+                const key = el.getAttribute('data-i18n');
+                if (dict[key]) el.textContent = dict[key];
+            });
+            document.querySelectorAll('[data-i18n-tip]').forEach(el => {
+                const key = el.getAttribute('data-i18n-tip');
+                if (dict[key]) el.setAttribute('data-tip', dict[key]);
+            });
+            const select = document.getElementById('lang-select');
+            if (select && select.value !== lang) select.value = lang;
+            // Sync toggle-showall button text with current mode
+            const toggleBtn = document.getElementById('toggle-showall');
+            if (toggleBtn && typeof window.__showAllMode !== 'undefined') {
+                toggleBtn.textContent = window.__showAllMode
+                    ? (dict['action.showRecent'] || 'Nur letzte 20')
+                    : (dict['action.showAll'] || 'Alle anzeigen');
+            }
+            // Re-render gallery so heading + counter + delete tooltip adapt
+            if (typeof window.__refreshGalleryNow === 'function') window.__refreshGalleryNow();
+        }
+
+        function applyTheme(theme) {
+            localStorage.setItem('searxng-prev-theme', theme);
+            if (theme === 'light') {
+                document.body.classList.add('theme-light');
+                const btn = document.getElementById('theme-toggle');
+                if (btn) btn.textContent = '☀️';
+            } else {
+                document.body.classList.remove('theme-light');
+                const btn = document.getElementById('theme-toggle');
+                if (btn) btn.textContent = '🌙';
+            }
+        }
+
+        document.addEventListener('DOMContentLoaded', () => {
+            // Apply saved theme + language early
+            applyTheme(localStorage.getItem('searxng-prev-theme') || 'dark');
+            applyLanguage(currentLang);
+
+            // Header controls
+            document.getElementById('theme-toggle').addEventListener('click', () => {
+                const isLight = document.body.classList.contains('theme-light');
+                applyTheme(isLight ? 'dark' : 'light');
+            });
+            document.getElementById('lang-select').addEventListener('change', (e) => applyLanguage(e.target.value));
+
+            const api = {
+                async requestJson(url, options = {}) {
+                    const res = await fetch(url, options);
+                    let data = null;
+                    try { data = await res.json(); } catch {}
+                    if (!res.ok) {
+                        const err = new Error(data?.message || data?.error || `HTTP ${res.status}`);
+                        err.status = res.status;
+                        err.data = data;
+                        throw err;
+                    }
+                    return data;
+                },
+                getStats: () => api.requestJson('/api/stats'),
+                getRecentCache: (limit = 20) => api.requestJson('/api/cache/recent?limit=' + limit),
+                deleteCacheEntry: (key) => api.requestJson('/api/cache/' + encodeURIComponent(key), { method: 'DELETE' }),
+                saveSettings: (settings) => api.requestJson('/api/settings', {
+                    method: 'PATCH',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(settings)
+                }),
+                clearCache: () => api.requestJson('/api/cache', { method: 'DELETE' })
+            };
+
+            // Elements
+            const elements = {
+                uptime: document.getElementById('uptime'),
+                statEntries: document.getElementById('stat-entries'),
+                statSize: document.getElementById('stat-size'),
+                statRenderTime: document.getElementById('stat-render-time'),
+                statHitRate: document.getElementById('stat-hit-rate'),
+                ttlSelect: document.getElementById('ttl'),
+                rateLimitInput: document.getElementById('rateLimit'),
+                blockPrivateIpsToggle: document.getElementById('blockPrivateIps'),
+                saveSettingsBtn: document.getElementById('save-settings'),
+                clearCacheBtn: document.getElementById('clear-cache'),
+                thumbnailGallery: document.getElementById('thumbnail-gallery'),
+                lightbox: document.getElementById('lightbox'),
+                lightboxImg: document.querySelector('#lightbox img'),
+                workersInput: document.getElementById('workers'),
+                workersValue: document.getElementById('workersValue'),
+                poolSlots: document.getElementById('pool-slots'),
+                poolCurrent: document.getElementById('pool-current'),
+                queueBadge: document.getElementById('queue-badge'),
+                poolSparkline: document.getElementById('pool-sparkline'),
+                poolTooltip: document.getElementById('pool-tooltip'),
+                percP50: document.getElementById('perc-p50'),
+                percP95: document.getElementById('perc-p95'),
+                percCount: document.getElementById('perc-count')
+            };
+
+            // Live-update slider label + auto-save (debounced)
+            let workerSaveTimeout = null;
+            let workerSliderDirty = false;
+            const saveFeedback = (text, color = 'var(--accent-color)') => {
+                const el = elements.workersValue;
+                const orig = el.textContent;
+                el.textContent = text;
+                el.style.color = color;
+                setTimeout(() => { el.style.color = ''; }, 1500);
+            };
+            elements.workersInput.addEventListener('input', () => {
+                elements.workersValue.textContent = elements.workersInput.value;
+                workerSliderDirty = true;
+                if (workerSaveTimeout) clearTimeout(workerSaveTimeout);
+                workerSaveTimeout = setTimeout(async () => {
+                    const n = parseInt(elements.workersInput.value, 10);
+                    try {
+                        const result = await api.saveSettings({ workers: n });
+                        if (result.warning) {
+                            saveFeedback(`⚠ ${n}`, '#f59e0b');
+                        } else {
+                            saveFeedback(`✓ ${n}`, '#4ade80');
+                        }
+                    } catch {
+                        saveFeedback(`⚠ Fehler`, '#e53935');
+                    } finally {
+                        workerSliderDirty = false;
+                    }
+                }, 400);
+            });
+
+            // Formatters
+            const t = (key) => (I18N[currentLang] && I18N[currentLang][key]) || key;
+            const formatUptime = (seconds) => {
+                const h = Math.floor(seconds / 3600).toString().padStart(2, '0');
+                const m = Math.floor((seconds % 3600) / 60).toString().padStart(2, '0');
+                const s = Math.floor(seconds % 60).toString().padStart(2, '0');
+                const label = currentLang === 'en' ? 'Uptime' : 'Laufzeit';
+                return `${label}: ${h}:${m}:${s}`;
+            };
+            
+            const formatBytes = (bytes, decimals = 2) => {
+                if (bytes === 0) return '0 Bytes';
+                const k = 1024;
+                const dm = decimals < 0 ? 0 : decimals;
+                const sizes = ['Bytes', 'KB', 'MB', 'GB', 'TB'];
+                const i = Math.floor(Math.log(bytes) / Math.log(k));
+                return parseFloat((bytes / Math.pow(k, i)).toFixed(dm)) + ' ' + sizes[i];
+            };
+
+            // State update functions
+            const updateStats = (stats) => {
+                elements.uptime.textContent = formatUptime(stats.uptime);
+                elements.statEntries.textContent = stats.entries;
+                elements.statSize.textContent = stats.sizeMB.toFixed(2);
+                elements.statRenderTime.textContent = stats.avgRenderTime.toFixed(0);
+                elements.statHitRate.textContent = stats.hitRate.toFixed(1);
+                elements.ttlSelect.value = stats.ttlHours;
+                elements.rateLimitInput.value = stats.rateLimitPerMinute;
+                elements.blockPrivateIpsToggle.checked = stats.blockPrivateIps;
+                if (stats.pool) {
+                    // Only sync slider from server when user hasn't touched it
+                    // (avoids snapping back while user is changing the value)
+                    if (!workerSliderDirty && document.activeElement !== elements.workersInput) {
+                        elements.workersInput.value = stats.pool.max;
+                        elements.workersValue.textContent = stats.pool.max;
+                    }
+                }
+            };
+
+            // === Worker Pool Visualization (A+B) ===
+            const SPARKLINE_W = 200;
+            const SPARKLINE_H = 50;
+            const MAX_SAMPLES = 60;
+            let poolHistory = [];
+
+            const renderSlots = (active, max) => {
+                const total = Math.max(1, max);
+                const slots = [];
+                for (let i = 0; i < total; i++) {
+                    let cls = 'pool-slot';
+                    if (i < active) cls += ' active';
+                    else cls += ' enabled';
+                    slots.push(`<div class="${cls}"></div>`);
+                }
+                elements.poolSlots.innerHTML = slots.join('');
+            };
+
+            const renderSparkline = (samples, currentMax) => {
+                if (!samples.length) {
+                    elements.poolSparkline.innerHTML = '';
+                    return;
+                }
+                // Scale: y-axis maxed at currentMax (slots available), min 0.
+                const scale = Math.max(currentMax, 1);
+                const stepX = SPARKLINE_W / Math.max(MAX_SAMPLES - 1, 1);
+                const padded = samples.length < MAX_SAMPLES
+                    ? [...Array(MAX_SAMPLES - samples.length).fill({ active: 0, queued: 0 }), ...samples]
+                    : samples;
+                const yFor = (v) => SPARKLINE_H - (Math.min(v, scale) / scale) * (SPARKLINE_H - 4) - 2;
+                const pts = padded.map((s, i) => `${(i * stepX).toFixed(2)},${yFor(s.active).toFixed(2)}`);
+                const area = `M0,${SPARKLINE_H} L${pts.join(' L')} L${SPARKLINE_W},${SPARKLINE_H} Z`;
+                const line = `M${pts.join(' L')}`;
+                const queueHasData = padded.some(s => s.queued > 0);
+                const queuePts = padded.map((s, i) => `${(i * stepX).toFixed(2)},${yFor(s.queued).toFixed(2)}`);
+                const queueLine = queueHasData ? `<path class="pool-sparkline-queue" d="M${queuePts.join(' L')}"/>` : '';
+                // Grid line at max capacity
+                const capY = yFor(scale);
+                elements.poolSparkline.innerHTML = `
+                    <line class="pool-sparkline-grid" x1="0" y1="${capY}" x2="${SPARKLINE_W}" y2="${capY}"/>
+                    <path class="pool-sparkline-area" d="${area}"/>
+                    <path class="pool-sparkline-line" d="${line}"/>
+                    ${queueLine}
+                `;
+            };
+
+            // Sparkline hover tooltip
+            elements.poolSparkline.addEventListener('mousemove', (e) => {
+                if (!poolHistory.length) return;
+                const rect = elements.poolSparkline.getBoundingClientRect();
+                const relX = (e.clientX - rect.left) / rect.width;
+                const padded = poolHistory.length < MAX_SAMPLES
+                    ? [...Array(MAX_SAMPLES - poolHistory.length).fill(null), ...poolHistory]
+                    : poolHistory;
+                const idx = Math.min(MAX_SAMPLES - 1, Math.max(0, Math.floor(relX * MAX_SAMPLES)));
+                const s = padded[idx];
+                if (!s) {
+                    elements.poolTooltip.style.display = 'none';
+                    return;
+                }
+                const ago = Math.max(0, Math.round((Date.now() - s.t) / 1000));
+                elements.poolTooltip.textContent = `vor ${ago}s · ${s.active}/${s.max} aktiv${s.queued ? ` · ${s.queued} wartend` : ''}`;
+                elements.poolTooltip.style.display = 'block';
+                elements.poolTooltip.style.left = `${e.clientX - rect.left}px`;
+                elements.poolTooltip.style.top = `${e.clientY - rect.top}px`;
+            });
+            elements.poolSparkline.addEventListener('mouseleave', () => {
+                elements.poolTooltip.style.display = 'none';
+            });
+
+            const formatMs = (ms) => {
+                if (!ms) return '—';
+                if (ms >= 1000) return `${(ms / 1000).toFixed(1)}s`;
+                return `${ms}ms`;
+            };
+
+            const escapeHtml = (value) => String(value ?? '')
+                .replace(/&/g, '&amp;')
+                .replace(/</g, '&lt;')
+                .replace(/>/g, '&gt;')
+                .replace(/"/g, '&quot;')
+                .replace(/'/g, '&#39;');
+
+            const refreshPool = async () => {
+                try {
+                    const res = await fetch('/api/pool/history');
+                    const data = await res.json();
+                    poolHistory = data.samples || [];
+                    const current = data.current || { active: 0, queued: 0, max: 5 };
+                    renderSlots(current.active, current.max);
+                    elements.poolCurrent.textContent = `${current.active}/${current.max}`;
+                    if (current.queued > 0) {
+                        elements.queueBadge.textContent = `${current.queued} wartend`;
+                        elements.queueBadge.classList.remove('hidden');
+                    } else {
+                        elements.queueBadge.classList.add('hidden');
+                    }
+                    renderSparkline(poolHistory, current.max);
+                    if (data.percentiles) {
+                        elements.percP50.textContent = formatMs(data.percentiles.p50);
+                        elements.percP95.textContent = formatMs(data.percentiles.p95);
+                        elements.percCount.textContent = `${data.percentiles.count} samples`;
+                    }
+                } catch { /* backend down, ignore */ }
+            };
+
+            const updateGallery = (items) => {
+                const dict = I18N[currentLang] || I18N.de;
+                const delTitle = escapeHtml(dict['action.deleteOne'] || 'Diesen Eintrag löschen');
+                elements.thumbnailGallery.innerHTML = items.map(item => {
+                    const rawKey = String(item.key || '');
+                    const safeKey = escapeHtml(rawKey);
+                    const safeUrl = escapeHtml(item.url);
+                    const isFallback = !!item.blocked || !!item.failed;
+                    let visual;
+                    if (isFallback) {
+                        const icon = item.failed ? '⚠️' : '🛡️';
+                        const label = escapeHtml(item.failed
+                            ? (dict['placeholder.error'] || 'Fehler / Timeout')
+                            : (dict['placeholder.blocked'] || 'Bot-Schutz aktiv'));
+                        const hint = escapeHtml(dict['placeholder.hint'] || 'Nutzer sieht Favicon statt Screenshot');
+                        visual = `<div class="thumbnail-placeholder${item.failed ? ' is-error' : ''}">
+                            <div class="ph-icon">${icon}</div>
+                            <div class="ph-label">${label}</div>
+                            <div class="ph-hint">${hint}</div>
+                        </div>`;
+                    } else {
+                        visual = `<img src="/api/cache/thumbnail/${encodeURIComponent(rawKey)}" alt="Preview of ${safeUrl}" loading="lazy">`;
+                    }
+                    return `
+                    <div class="thumbnail-item" data-key="${safeKey}" data-fallback="${isFallback ? '1' : '0'}">
+                        <button class="thumb-del-btn" data-del="${safeKey}" title="${delTitle}" aria-label="${delTitle}">✕</button>
+                        ${visual}
+                        <div class="overlay">
+                            <p>${safeUrl}</p>
+                            <p>${escapeHtml(new Date(item.createdAt).toLocaleString())} | ${escapeHtml(formatBytes(item.sizeBytes))}</p>
+                        </div>
+                    </div>`;
+                }).join('');
+                // Update count info under the actions bar
+                const countInfo = document.getElementById('cache-count-info');
+                if (countInfo) {
+                    const shown = items.length;
+                    countInfo.textContent = (dict['cache.showing'] || 'Zeige')
+                        + ' ' + shown + ' '
+                        + (dict['cache.entries'] || 'Einträge');
+                }
+                // Update heading to match current view
+                const heading = document.getElementById('cache-recent-heading');
+                if (heading) {
+                    heading.textContent = showAllMode
+                        ? (dict['cache.all'] || 'Alle Screenshots')
+                        : (dict['cache.recent'] || 'Letzte 20 Screenshots');
+                }
+            };
+
+            // Main data fetch function
+            let showAllMode = false;
+            let refreshSeq = 0;
+            const refreshData = async () => {
+                const seq = ++refreshSeq;
+                try {
+                    const fetchLimit = showAllMode ? 2000 : 20;
+                    const [stats, recent] = await Promise.all([api.getStats(), api.getRecentCache(fetchLimit)]);
+                    // Ignore stale responses from older in-flight refreshes.
+                    if (seq !== refreshSeq) return;
+                    updateStats(stats);
+                    updateGallery(recent);
+                } catch (error) {
+                    if (seq !== refreshSeq) return;
+                    console.error('Failed to fetch data:', error);
+                }
+            };
+            // Expose for language-switch re-render hook
+            window.__refreshGalleryNow = refreshData;
+            Object.defineProperty(window, '__showAllMode', { get: () => showAllMode });
+            
+            // Event Listeners
+            elements.saveSettingsBtn.addEventListener('click', async () => {
+                const settings = {
+                    ttlHours: parseInt(elements.ttlSelect.value, 10),
+                    rateLimitPerMinute: parseInt(elements.rateLimitInput.value, 10),
+                    blockPrivateIps: elements.blockPrivateIpsToggle.checked
+                    // workers gets its own auto-save via the slider in the pool card
+                };
+                try {
+                    const result = await api.saveSettings(settings);
+                    if (result.warning) {
+                        alert((currentLang === 'en'
+                            ? 'Settings applied, but persistence failed. They may be lost after restart.'
+                            : 'Einstellungen angewendet, aber Speichern fehlgeschlagen. Nach Neustart evtl. weg.')
+                            + (result.persistError ? `\n\n${result.persistError}` : ''));
+                    } else {
+                        alert(t('action.saved'));
+                    }
+                    refreshData();
+                } catch (error) {
+                    console.error('Failed to save settings:', error);
+                    const details = error?.data?.errors?.map(e => `${e.field}: ${e.error}`).join('\n');
+                    alert((currentLang === 'en' ? 'Failed to save settings.' : 'Fehler beim Speichern der Einstellungen.') + (details ? `\n\n${details}` : ''));
+                }
+            });
+
+            elements.clearCacheBtn.addEventListener('click', async () => {
+                if (confirm(t('action.confirmClear'))) {
+                    try {
+                        const result = await api.clearCache();
+                        alert(`${result.deleted} ${t('action.deleted')}`);
+                        refreshData();
+                    } catch (error) {
+                        console.error('Failed to clear cache:', error);
+                        alert(currentLang === 'en' ? 'Failed to clear cache.' : 'Fehler beim Leeren des Caches.');
+                    }
+                }
+            });
+
+            elements.thumbnailGallery.addEventListener('click', async (e) => {
+                const delBtn = e.target.closest('.thumb-del-btn');
+                if (delBtn) {
+                    e.stopPropagation();
+                    const key = delBtn.dataset.del;
+                    const dict = I18N[currentLang] || I18N.de;
+                    if (!confirm(dict['action.confirmDelete'] || 'Diesen Eintrag wirklich löschen?')) return;
+                    try {
+                        await api.deleteCacheEntry(key);
+                        const tile = delBtn.closest('.thumbnail-item');
+                        if (tile) tile.remove();
+                        // Refresh counts / stats in the background
+                        refreshData();
+                    } catch (err) {
+                        console.error('Delete failed', err);
+                        alert('⚠️ ' + (dict['action.deleteFailed'] || 'Löschen fehlgeschlagen'));
+                    }
+                    return;
+                }
+                const item = e.target.closest('.thumbnail-item');
+                if (item && item.dataset.fallback !== '1') {
+                    const key = item.dataset.key;
+                    elements.lightboxImg.src = `/api/cache/thumbnail/${key}`;
+                    elements.lightbox.style.display = 'flex';
+                }
+            });
+
+            const toggleShowAllBtn = document.getElementById('toggle-showall');
+            if (toggleShowAllBtn) {
+                toggleShowAllBtn.addEventListener('click', () => {
+                    showAllMode = !showAllMode;
+                    const dict = I18N[currentLang] || I18N.de;
+                    toggleShowAllBtn.textContent = showAllMode
+                        ? (dict['action.showRecent'] || 'Nur letzte 20')
+                        : (dict['action.showAll'] || 'Alle anzeigen');
+                    // Remove data-i18n so applyLanguage doesn't reset us to "Alle anzeigen"
+                    toggleShowAllBtn.removeAttribute('data-i18n');
+                    refreshData();
+                });
+            }
+
+            elements.lightbox.addEventListener('click', () => {
+                elements.lightbox.style.display = 'none';
+            });
+
+            // Initial load and auto-refresh
+            refreshData();
+            refreshPool();
+            setInterval(refreshData, 10000);
+            setInterval(refreshPool, 1500); // Fast-refresh the live pool card
+        });
+    </script>
+
+</body>
+</html>

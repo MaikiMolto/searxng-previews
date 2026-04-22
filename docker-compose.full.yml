@@ -1,0 +1,66 @@
+# SearXNG Previews — Full Stack (SearXNG + Preview Service)
+# Everything you need in one file. Just copy, paste, and run.
+#
+# Usage:
+#   docker compose -f docker-compose.full.yml up -d
+#
+# SearXNG:  http://<your-ip>:8080
+# Dashboard: http://<your-ip>:3200
+#
+# ⚠️ Change SEARXNG_SECRET to your own random string!
+#    Generate one: openssl rand -hex 32
+
+services:
+  # ── SearXNG Search Engine ──
+  searxng:
+    image: searxng/searxng:latest
+    container_name: searxng
+    restart: unless-stopped
+    ports:
+      - '8080:8080'
+    volumes:
+      - searxng-config:/etc/searxng:rw
+    environment:
+      - TZ=Europe/Berlin
+      - SEARXNG_BASE_URL=http://localhost:8080/
+      - SEARXNG_SECRET=CHANGE_ME_generate_with_openssl_rand_hex_32
+      - UWSGI_WORKERS=4
+      - UWSGI_THREADS=4
+    cap_drop:
+      - ALL
+    cap_add:
+      - CHOWN
+      - SETGID
+      - SETUID
+      - DAC_OVERRIDE
+    logging:
+      driver: json-file
+      options:
+        max-size: 1m
+        max-file: '1'
+
+  # ── Preview Service (Thumbnail Generator) ──
+  preview-service:
+    image: ghcr.io/maikimolto/searxng-previews:latest
+    # For local builds instead of GHCR image, uncomment:
+    # build: ./packages/backend
+    ports:
+      - '3200:3000'
+    volumes:
+      - preview-cache:/app/cache
+    environment:
+      - PORT=3000
+      - CACHE_TTL_HOURS=168          # 7 days
+      - RATE_LIMIT_PER_MINUTE=30
+      - BLOCK_PRIVATE_IPS=true
+      - MAX_CACHE_SIZE_MB=500
+      - CONCURRENCY=6
+    restart: unless-stopped
+    deploy:
+      resources:
+        limits:
+          memory: 1G
+
+volumes:
+  searxng-config:
+  preview-cache:

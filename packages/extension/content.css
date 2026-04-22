@@ -1,0 +1,57 @@
+/* content.css */
+
+.srp-thumb {
+  display: inline-block;
+  vertical-align: top;
+  border-radius: 6px;
+  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+  object-fit: cover;
+  transition: opacity 0.3s ease-in-out, transform 0.2s ease-in-out;
+  transform: scale(1);
+}
+
+.srp-thumb:hover {
+    transform: scale(1.05);
+    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
+}
+
+.srp-thumb-left {
+  float: left;
+  margin: 5px 15px 5px 0;
+}
+
+.srp-thumb-right {
+  float: right;
+  margin: 5px 0 5px 15px;
+}
+
+.srp-thumb-hover {
+  display: none;
+  position: absolute;
+  z-index: 100;
+  left: 50%;
+  transform: translateX(-50%);
+  bottom: calc(100% + 8px);
+  pointer-events: none;
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.3);
+  border: 2px solid #3050F0;
+}
+
+article.result {
+    position: relative; /* Needed for hover positioning */
+}
+
+article.result:hover .srp-thumb-hover {
+  display: block;
+}
+
+/* Dark Mode */
+@media (prefers-color-scheme: dark) {
+  .srp-thumb {
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.4);
+    border: 1px solid #444;
+  }
+  .srp-thumb:hover {
+    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.6);
+  }
+}

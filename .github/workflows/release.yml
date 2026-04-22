@@ -1,0 +1,253 @@
+name: Release
+
+on:
+  push:
+    tags:
+      - 'v*'
+
+jobs:
+  build-docker:
+    name: Build and Push Docker Image
+    runs-on: ubuntu-latest
+    
+    steps:
+    - name: Checkout repository
+      uses: actions/checkout@v4
+    
+    - name: Set up Docker Buildx
+      uses: docker/setup-buildx-action@v3
+    
+    - name: Log in to GitHub Container Registry
+      uses: docker/login-action@v3
+      with:
+        registry: ghcr.io
+        username: ${{ github.actor }}
+        password: ${{ secrets.GITHUB_TOKEN }}
+    
+    - name: Extract metadata
+      id: meta
+      uses: docker/metadata-action@v5
+      with:
+        images: ghcr.io/maikimolto/searxng-previews
+        tags: |
+          type=semver,pattern={{version}}
+          type=semver,pattern={{major}}.{{minor}}
+          type=semver,pattern={{major}}
+          type=raw,value=latest
+          type=raw,value={{branch}}
+    
+    - name: Build and push Docker image
+      uses: docker/build-push-action@v5
+      with:
+        context: .
+        file: ./packages/backend/Dockerfile
+        push: true
+        tags: ${{ steps.meta.outputs.tags }}
+        labels: ${{ steps.meta.outputs.labels }}
+        cache-from: type=gha
+        cache-to: type=gha,mode=max
+    
+    - name: Verify pushed tags
+      run: |
+        echo "Docker image pushed with tags:"
+        echo "${{ steps.meta.outputs.tags }}"
+
+  build-extension:
+    name: Build Extension ZIP
+    runs-on: ubuntu-latest
+    
+    steps:
+    - name: Checkout repository
+      uses: actions/checkout@v4
+    
+    - name: Setup Node.js
+      uses: actions/setup-node@v4
+      with:
+        node-version: '20'
+        cache: 'npm'
+    
+    - name: Install dependencies
+      run: npm ci
+    
+    - name: Build extension
+      run: |
+        cd packages/extension
+        npm run build
+    
+    - name: Create extension ZIP
+      run: |
+        cd packages/extension
+        zip -r searxng-previews-extension-${{ github.ref_name }}.zip dist/ manifest.json
+    
+    - name: Upload extension ZIP as artifact
+      uses: actions/upload-artifact@v4
+      with:
+        name: extension-zip
+        path: packages/extension/searxng-previews-extension-${{ github.ref_name }}.zip
+
+  create-release:
+    name: Create GitHub Release
+    runs-on: ubuntu-latest
+    needs: [build-docker, build-extension]
+    
+    steps:
+    - name: Checkout repository
+      uses: actions/checkout@v4
+    
+    - name: Download extension ZIP
+      uses: actions/download-artifact@v4
+      with:
+        name: extension-zip
+    
+    - name: Create GitHub Release
+      uses: softprops/action-gh-release@v1
+      with:
+        name: Release ${{ github.ref_name }}
+        body: |
+          ## SearXNG Result Previews ${{ github.ref_name }}
+          
+          ### What's New
+          - See CHANGELOG.md for detailed changes
+          
+          ### Installation
+          
+          #### Docker Backend
+          ```bash
+          docker pull ghcr.io/maikimolto/searxng-previews:${{ github.ref_name }}
+          ```
+          
+          #### Browser Extension
+          1. Download the extension ZIP below
+          2. Go to `chrome://extensions`
+          3. Enable Developer mode
+          4. Drag and drop the ZIP file or use "Load unpacked"
+          
+          ### Docker Tags Available
+          - `ghcr.io/maikimolto/searxng-previews:${{ github.ref_name }}`
+          - `ghcr.io/maikimolto/searxng-previews:latest`
+          
+          ### Full Changelog
+          See [CHANGELOG.md](https://github.com/maikimolto/searxng-previews/blob/main/CHANGELOG.md)
+        draft: false
+        prerelease: false
+        files: |
+          searxng-previews-extension-${{ github.ref_name }}.zip
+        tag_name: ${{ github.ref_name }}
+
+  update-changelog:
+    name: Update Changelog
+    runs-on: ubuntu-latest
+    needs: create-release
+    
+    steps:
+    - name: Checkout repository
+      uses: actions/checkout@v4
+      with:
+        token: ${{ secrets.GITHUB_TOKEN }}
+    
+    - name: Setup Git
+      run: |
+        git config user.name "GitHub Actions"
+        git config user.email "actions@github.com"
+    
+    - name: Update CHANGELOG.md if exists
+      run: |
+        if [ -f CHANGELOG.md ]; then
+          # Extract tag name without 'v' prefix
+          VERSION=${GITHUB_REF#refs/tags/v}
+          
+          # Get current date
+          DATE=$(date +%Y-%m-%d)
+          
+          # Create temporary changelog
+          cat > /tmp/new-changelog.md << EOF
+          # Changelog
+          
+          All notable changes to this project will be documented in this file.
+          
+          ## [$VERSION] - $DATE
+          
+          ### Added
+          - Initial release
+          
+          ### Changed
+          - 
+          
+          ### Fixed
+          - 
+          
+          EOF
+          
+          # Append existing changelog (skip first line if it's the title)
+          tail -n +2 CHANGELOG.md >> /tmp/new-changelog.md
+          
+          # Replace changelog
+          mv /tmp/new-changelog.md CHANGELOG.md
+          
+          # Commit and push
+          git add CHANGELOG.md
+          git commit -m "docs: update CHANGELOG.md for $VERSION"
+          git push
+        else
+          echo "CHANGELOG.md not found, creating initial version"
+          
+          # Extract tag name without 'v' prefix
+          VERSION=${GITHUB_REF#refs/tags/v}
+          
+          # Get current date
+          DATE=$(date +%Y-%m-%d)
+          
+          # Create changelog
+          cat > CHANGELOG.md << EOF
+          # Changelog
+          
+          All notable changes to this project will be documented in this file.
+          
+          The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
+          and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
+          
+          ## [$VERSION] - $DATE
+          
+          ### Added
+          - Initial release of SearXNG Result Previews
+          - Docker-based screenshot backend
+          - Browser extension for Chrome/Edge
+          - Self-hosted architecture
+          - Privacy-focused design
+          
+          ### Changed
+          - 
+          
+          ### Fixed
+          - 
+          
+          EOF
+          
+          # Commit and push
+          git add CHANGELOG.md
+          git commit -m "docs: create initial CHANGELOG.md"
+          git push
+        fi
+
+  release-summary:
+    name: Release Summary
+    runs-on: ubuntu-latest
+    needs: [create-release, update-changelog]
+    if: always()
+    
+    steps:
+    - name: Print release summary
+      run: |
+        echo "🎉 Release ${{ github.ref_name }} Complete!"
+        echo ""
+        echo "📦 Artifacts Published:"
+        echo "  - Docker Image: ghcr.io/maikimolto/searxng-previews:${{ github.ref_name }}"
+        echo "  - Docker Image: ghcr.io/maikimolto/searxng-previews:latest"
+        echo "  - Extension ZIP: searxng-previews-extension-${{ github.ref_name }}.zip"
+        echo ""
+        echo "🔗 Release URL: https://github.com/maikimolto/searxng-previews/releases/tag/${{ github.ref_name }}"
+        echo ""
+        echo "📝 Next Steps:"
+        echo "  1. Update documentation if needed"
+        echo "  2. Announce release to community"
+        echo "  3. Monitor for any issues"
