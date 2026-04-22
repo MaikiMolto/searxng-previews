@@ -47,7 +47,7 @@ article.result:hover .srp-thumb-hover {
   display: block;
 }
 /* Placeholder cards in hover mode also need absolute positioning */
-.srp-placeholder-card.srp-thumb-hover {
+.srp-thumb-placeholder.srp-thumb-hover {
   display: none;
   position: absolute;
   z-index: 100;
@@ -56,7 +56,7 @@ article.result:hover .srp-thumb-hover {
   bottom: calc(100% + 8px);
   pointer-events: none;
 }
-article.result:hover .srp-placeholder-card.srp-thumb-hover {
+article.result:hover .srp-thumb-placeholder.srp-thumb-hover {
   display: flex;
 }
 
@@ -102,9 +102,9 @@ article.result:hover .srp-placeholder-card.srp-thumb-hover {
 
 
 /* Placeholder cards in hover mode: hidden by default, shown on article hover */
-.srp-placeholder-card.srp-thumb-hover {
+.srp-thumb-placeholder.srp-thumb-hover {
   display: none;
 }
-article.result:hover .srp-placeholder-card.srp-thumb-hover {
+article.result:hover .srp-thumb-placeholder.srp-thumb-hover {
   display: flex;
 }
