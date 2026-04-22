@@ -44,7 +44,9 @@
         URL.revokeObjectURL(img.src);
       }
       img.src = faviconUrl;
-      img.style.objectFit = 'contain';
+      img.style.objectFit = 'cover';
+      img.style.background = 'var(--result-bg, #1f2328)';
+      img.style.border = '1px solid rgba(255,255,255,0.08)';
       img.style.opacity = '1';
     }
 
@@ -136,10 +138,16 @@
     img.style.transition = 'opacity 0.3s ease-in-out';
 
     img.dataset.backendUrl = `${settings.backendUrl}/preview?url=${encodeURIComponent(resultUrl)}&width=${pixelWidth}&format=webp`;
-    // No third-party fallback — self-hosted only
-    // Self-hosted only — no external service calls for privacy.
-    // Generic globe icon as fallback when screenshot fails.
-    img.dataset.faviconUrl = `data:image/svg+xml,${encodeURIComponent('<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="%236b7280" stroke-width="1.5"><circle cx="12" cy="12" r="10"/><path d="M2 12h20M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"/></svg>')}`;
+    // No third-party fallback — self-hosted only.
+    // Use a proper placeholder card similar to the dashboard, not just a tiny icon.
+    img.dataset.faviconUrl = `data:image/svg+xml,${encodeURIComponent(`<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 320 240">
+      <rect width="320" height="240" rx="12" fill="#1f2328"/>
+      <rect x="16" y="16" width="288" height="208" rx="10" fill="#2b3138" stroke="#3a424c"/>
+      <circle cx="160" cy="92" r="28" fill="none" stroke="#7c8796" stroke-width="4"/>
+      <path d="M104 92h112M160 64c11 14 17 28 17 28s-6 14-17 28c-11-14-17-28-17-28s6-14 17-28z" fill="none" stroke="#7c8796" stroke-width="4" stroke-linecap="round" stroke-linejoin="round"/>
+      <text x="160" y="155" text-anchor="middle" font-family="Arial, sans-serif" font-size="20" font-weight="700" fill="#e5e7eb">No Preview</text>
+      <text x="160" y="180" text-anchor="middle" font-family="Arial, sans-serif" font-size="14" fill="#9aa4b2">Bot protection / timeout / blocked</text>
+    </svg>`)}`;
 
     const container = resultElement.querySelector('h3') || resultElement.firstChild;
 

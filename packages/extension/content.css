@@ -6,6 +6,8 @@
   border-radius: 6px;
   box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
   object-fit: cover;
+  background: #1f2328;
+  border: 1px solid rgba(255,255,255,0.08);
   transition: opacity 0.3s ease-in-out, transform 0.2s ease-in-out;
   transform: scale(1);
 }
