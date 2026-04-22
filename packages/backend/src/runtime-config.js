@@ -14,6 +14,12 @@ const SCHEMA = {
     max: 20,
     default: parseInt(process.env.CONCURRENCY, 10) || 6,
   },
+  thumbSize: {
+    type: 'int',
+    min: 80,
+    max: 240,
+    default: parseInt(process.env.THUMB_SIZE, 10) || 120,
+  },
 };
 
 function coerceInt(value, { min, max, fallback }) {

@@ -647,6 +647,15 @@
                         </div>
                     </div>
                 </div>
+                    <div class="form-group">
+                        <label for="thumbSize">
+                            <span data-i18n="settings.thumbSize">🖼️ Thumbnail-Größe</span>
+                        </label>
+                        <div style="display:flex;align-items:center;gap:8px">
+                            <input type="range" id="thumbSize" min="80" max="240" step="10" value="120" style="flex:1">
+                            <span id="thumbSizeValue" style="min-width:45px;text-align:right;font-weight:600">120px</span>
+                        </div>
+                    </div>
                  <div class="actions">
                     <button id="save-settings" class="btn" data-i18n="action.save">Speichern</button>
                 </div>
@@ -688,6 +697,7 @@
                 'settings.ttl': 'Aufbewahrungsdauer',
                 'settings.rateLimit': 'Rate-Limit (req/min)',
                 'settings.blockIps': 'Private IPs blockieren',
+                'settings.thumbSize': '🖼️ Thumbnail-Größe',
                 'cache.title': 'Cache-Verwaltung',
                 'cache.recent': 'Letzte 20 Screenshots',
                 'action.save': 'Speichern',
@@ -736,6 +746,7 @@
                 'settings.ttl': 'Retention',
                 'settings.rateLimit': 'Rate limit (req/min)',
                 'settings.blockIps': 'Block private IPs',
+                'settings.thumbSize': '🖼️ Thumbnail Size',
                 'cache.title': 'Cache management',
                 'cache.recent': 'Last 20 screenshots',
                 'action.save': 'Save',
@@ -859,6 +870,8 @@
                 ttlSelect: document.getElementById('ttl'),
                 rateLimitInput: document.getElementById('rateLimit'),
                 blockPrivateIpsToggle: document.getElementById('blockPrivateIps'),
+                thumbSize: document.getElementById("thumbSize"),
+                thumbSizeValue: document.getElementById("thumbSizeValue"),
                 saveSettingsBtn: document.getElementById('save-settings'),
                 clearCacheBtn: document.getElementById('clear-cache'),
                 thumbnailGallery: document.getElementById('thumbnail-gallery'),
@@ -879,6 +892,12 @@
             // Live-update slider label + auto-save (debounced)
             let workerSaveTimeout = null;
             let workerSliderDirty = false;
+            // Thumbnail size slider
+            if (elements.thumbSize) {
+                elements.thumbSize.addEventListener("input", () => {
+                    elements.thumbSizeValue.textContent = elements.thumbSize.value + "px";
+                });
+            }
             const saveFeedback = (text, color = 'var(--accent-color)') => {
                 const el = elements.workersValue;
                 const orig = el.textContent;
@@ -936,6 +955,7 @@
                 elements.ttlSelect.value = stats.ttlHours;
                 elements.rateLimitInput.value = stats.rateLimitPerMinute;
                 elements.blockPrivateIpsToggle.checked = stats.blockPrivateIps;
+                if (elements.thumbSize) { elements.thumbSize.value = stats.thumbSize || 120; elements.thumbSizeValue.textContent = (stats.thumbSize || 120) + "px"; }
                 if (stats.pool) {
                     // Only sync slider from server when user hasn't touched it
                     // (avoids snapping back while user is changing the value)
@@ -1128,7 +1148,8 @@
                 const settings = {
                     ttlHours: parseInt(elements.ttlSelect.value, 10),
                     rateLimitPerMinute: parseInt(elements.rateLimitInput.value, 10),
-                    blockPrivateIps: elements.blockPrivateIpsToggle.checked
+                    blockPrivateIps: elements.blockPrivateIpsToggle.checked,
+                    thumbSize: parseInt(elements.thumbSize?.value || 120, 10)
                     // workers gets its own auto-save via the slider in the pool card
                 };
                 try {
