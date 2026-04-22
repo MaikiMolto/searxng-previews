@@ -165,7 +165,7 @@ All settings can also be changed at runtime via the admin dashboard.
 
 | Setting | Default | Description |
 |---------|---------|-------------|
-| **Backend URL** | *(empty)* | URL of your preview backend (e.g. `http://192.168.1.50:3200`) |
+| **Backend URL** | *(empty)* | URL of your preview backend (e.g. `http://192.0.2.10:3200`) |
 | **SearXNG URLs** | *(empty)* | Your SearXNG instance URL(s), one per line |
 | **Position** | `Left` | Where the thumbnail appears (Left / Right / Hover / Off) |
 | **Size** | `120px` | Thumbnail width in pixels (80-240) |
@@ -177,7 +177,7 @@ If your SearXNG instance uses **HTTPS**, the backend must also be served over HT
 **Recommended setup:** Put the backend behind a reverse proxy (nginx, Caddy, Zoraxy, Traefik) with its own hostname:
 
 ```
-https://previews.example.com  →  http://192.168.1.50:3200
+https://previews.example.com  →  http://192.0.2.10:3200
 ```
 
 **Minimal nginx config:**
@@ -191,7 +191,7 @@ server {
     ssl_certificate_key /path/to/key.pem;
 
     location / {
-        proxy_pass http://192.168.1.50:3200;
+        proxy_pass http://192.0.2.10:3200;
         proxy_set_header Host $host;
         proxy_set_header X-Forwarded-For $remote_addr;
         proxy_set_header X-Forwarded-Proto $scheme;

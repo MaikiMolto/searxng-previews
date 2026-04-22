@@ -249,13 +249,13 @@
 <body>
 
     <h1>SearXNG Previews</h1>
-    <p class="subtitle">Thumbnail previews for SearXNG search results · <a href="https://github.com/your-repo/searxng-previews" target="_blank" rel="noopener">Documentation</a></p>
+    <p class="subtitle">Thumbnail previews for SearXNG search results · <a href="https://github.com/MaikiMolto/searxng-previews" target="_blank" rel="noopener">Documentation</a></p>
 
     <div class="info-box">
         <h3>🚀 Quick Start</h3>
         <p>This extension needs a <strong>self-hosted Preview Service</strong> (backend) to generate thumbnails. It does <em>not</em> work on its own.</p>
         <ul>
-            <li><strong>Install the backend</strong> via Docker: <a href="https://github.com/your-repo/searxng-previews" target="_blank" rel="noopener">github.com/your-repo/searxng-previews</a></li>
+            <li><strong>Install the backend</strong> via Docker: <a href="https://github.com/MaikiMolto/searxng-previews" target="_blank" rel="noopener">github.com/MaikiMolto/searxng-previews</a></li>
             <li>Enter the <strong>backend URL</strong> and your <strong>SearXNG instance URL(s)</strong> below</li>
             <li>Hit <em>Save</em> — done!</li>
         </ul>
@@ -263,7 +263,7 @@
 
     <div class="info-box">
         <h3>💡 Tip: Find your SearXNG URL</h3>
-        <p>Open your SearXNG instance in a new tab, copy the address-bar URL (just the origin, e.g. <code>https://search.example.com</code> or <code>http://192.168.1.50:8080</code>) and paste it below. No trailing slash, no paths.</p>
+        <p>Open your SearXNG instance in a new tab, copy the address-bar URL (just the origin, e.g. <code>https://search.example.com</code> or <code>http://192.0.2.10:8080</code>) and paste it below. No trailing slash, no paths.</p>
         <p><strong>Important:</strong> <code>http://</code> and <code>https://</code> are different origins. If you access the same instance via both, list both URLs.</p>
     </div>
 
@@ -286,7 +286,7 @@
         <div class="form-group">
             <label for="backendUrl">Preview Service URL <span id="healthStatus"></span></label>
             <div class="input-group">
-                <input type="text" id="backendUrl" placeholder="e.g. http://192.168.1.50:3200 or https://previews.example.com">
+                <input type="text" id="backendUrl" placeholder="e.g. http://192.0.2.10:3200 or https://previews.example.com">
                 <button id="checkHealth" type="button">Check</button>
             </div>
             <div style="margin-top: 0.6em;">
@@ -306,7 +306,6 @@
 
         <div class="form-group">
             <label for="searxngUrls">Instance URLs (one per line)</label>
-            <textarea id="searxngUrls" placeholder="e.g.&#10;http://192.168.1.50:8080&#10;https://search.example.com&#10;http://searx.lan&#10;https://searx.example.com"></textarea>
             <small class="hint">
                 The extension only activates on pages whose origin exactly matches one of these URLs.
                 If you access the same SearXNG instance via both HTTP and HTTPS (e.g. a LAN name and a public domain), list both.
