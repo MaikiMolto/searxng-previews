@@ -36,18 +36,18 @@
 
   async function loadThumbnail(img) {
     const backendUrl = img.dataset.backendUrl;
-    const faviconUrl = img.dataset.faviconUrl;
 
     function showFavicon() {
-      // Revoke old blob URL if any
-      if (img.src && img.src.startsWith('blob:')) {
-        URL.revokeObjectURL(img.src);
-      }
-      img.src = faviconUrl;
-      img.style.objectFit = 'cover';
-      img.style.background = 'var(--result-bg, #1f2328)';
-      img.style.border = '1px solid rgba(255,255,255,0.08)';
-      img.style.opacity = '1';
+      const placeholder = document.createElement('div');
+      placeholder.className = `srp-thumb srp-thumb-${settings.position} srp-thumb-placeholder`;
+      placeholder.style.width = img.style.width;
+      placeholder.style.height = img.style.height;
+      placeholder.innerHTML = `
+        <div class="srp-thumb-ph-icon">🛡️</div>
+        <div class="srp-thumb-ph-title">No Preview</div>
+        <div class="srp-thumb-ph-hint">Bot protection / timeout / blocked</div>
+      `;
+      img.replaceWith(placeholder);
     }
 
     const safetyTimeout = setTimeout(() => {
@@ -138,16 +138,6 @@
     img.style.transition = 'opacity 0.3s ease-in-out';
 
     img.dataset.backendUrl = `${settings.backendUrl}/preview?url=${encodeURIComponent(resultUrl)}&width=${pixelWidth}&format=webp`;
-    // No third-party fallback — self-hosted only.
-    // Use a proper placeholder card similar to the dashboard, not just a tiny icon.
-    img.dataset.faviconUrl = `data:image/svg+xml,${encodeURIComponent(`<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 320 240">
-      <rect width="320" height="240" rx="12" fill="#1f2328"/>
-      <rect x="16" y="16" width="288" height="208" rx="10" fill="#2b3138" stroke="#3a424c"/>
-      <circle cx="160" cy="92" r="28" fill="none" stroke="#7c8796" stroke-width="4"/>
-      <path d="M104 92h112M160 64c11 14 17 28 17 28s-6 14-17 28c-11-14-17-28-17-28s6-14 17-28z" fill="none" stroke="#7c8796" stroke-width="4" stroke-linecap="round" stroke-linejoin="round"/>
-      <text x="160" y="155" text-anchor="middle" font-family="Arial, sans-serif" font-size="20" font-weight="700" fill="#e5e7eb">No Preview</text>
-      <text x="160" y="180" text-anchor="middle" font-family="Arial, sans-serif" font-size="14" fill="#9aa4b2">Bot protection / timeout / blocked</text>
-    </svg>`)}`;
 
     const container = resultElement.querySelector('h3') || resultElement.firstChild;
 
