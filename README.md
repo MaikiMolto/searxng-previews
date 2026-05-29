@@ -1,5 +1,11 @@
 # SearXNG Result Previews 🖼️
 
+[![Latest Release](https://img.shields.io/github/v/release/MaikiMolto/searxng-previews?style=flat-square)](https://github.com/MaikiMolto/searxng-previews/releases)
+[![License](https://img.shields.io/github/license/MaikiMolto/searxng-previews?style=flat-square)](LICENSE)
+[![Docker](https://img.shields.io/badge/ghcr.io-maikimolto%2Fsearxng--previews-2496ed?style=flat-square&logo=docker&logoColor=white)](https://github.com/MaikiMolto/searxng-previews/pkgs/container/searxng-previews)
+[![Build & Publish](https://img.shields.io/github/actions/workflow/status/MaikiMolto/searxng-previews/docker-publish.yml?style=flat-square&label=docker%20build)](https://github.com/MaikiMolto/searxng-previews/actions/workflows/docker-publish.yml)
+[![GitHub stars](https://img.shields.io/github/stars/MaikiMolto/searxng-previews?style=flat-square)](https://github.com/MaikiMolto/searxng-previews/stargazers)
+
 > Self-hosted thumbnail previews for your SearXNG search results. No external services, no tracking — just fast screenshots from your own server.
 
 ![Search Results with Previews](docs/screenshots/search-results.jpg)
