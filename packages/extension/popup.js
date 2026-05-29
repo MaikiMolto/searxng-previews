@@ -6,6 +6,7 @@ document.addEventListener('DOMContentLoaded', () => {
     const backendStatusText = document.getElementById('backendStatusText');
     const positionSelect = document.getElementById('positionSelect');
     const workersSelect = document.getElementById('workersSelect');
+    const privacySelect = document.getElementById('privacySelect');
     const popupHint = document.getElementById('popupHint');
     const openOptionsBtn = document.getElementById('openOptions');
     const openDashboardBtn = document.getElementById('openDashboard');
@@ -13,9 +14,10 @@ document.addEventListener('DOMContentLoaded', () => {
     let currentBackendUrl = '';
 
     // Load current state
-    chrome.storage.sync.get(['enabled', 'backendUrl', 'position'], async (items) => {
+    chrome.storage.sync.get(['enabled', 'backendUrl', 'position', 'privacyMode'], async (items) => {
         enabledToggle.checked = items.enabled !== false;
         positionSelect.value = items.position || 'left';
+        privacySelect.value = items.privacyMode === 'favicons' ? 'favicons' : 'strict';
         currentBackendUrl = items.backendUrl || '';
         updateDashboardBtn();
         await checkHealth(currentBackendUrl);
@@ -31,6 +33,14 @@ document.addEventListener('DOMContentLoaded', () => {
     positionSelect.addEventListener('change', () => {
         chrome.storage.sync.set({ position: positionSelect.value });
         popupHint.textContent = 'Position saved — reload SearXNG tab if needed';
+    });
+
+    // Quick privacy-mode change
+    privacySelect.addEventListener('change', () => {
+        chrome.storage.sync.set({ privacyMode: privacySelect.value });
+        popupHint.textContent = privacySelect.value === 'favicons'
+            ? 'Favicons on — reload SearXNG tab to apply'
+            : 'Full privacy on — reload SearXNG tab to apply';
     });
 
     // Quick worker change
@@ -120,6 +130,9 @@ document.addEventListener('DOMContentLoaded', () => {
             }
             if (changes.position) {
                 positionSelect.value = changes.position.newValue || 'left';
+            }
+            if (changes.privacyMode) {
+                privacySelect.value = changes.privacyMode.newValue === 'favicons' ? 'favicons' : 'strict';
             }
             if (changes.backendUrl) {
                 currentBackendUrl = changes.backendUrl.newValue || '';

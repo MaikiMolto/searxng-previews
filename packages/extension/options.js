@@ -5,6 +5,7 @@ document.addEventListener('DOMContentLoaded', () => {
     const statusEl = document.getElementById('status');
     const enabledToggle = document.getElementById('enabled');
     const positionRadios = document.querySelectorAll('input[name="position"]');
+    const privacyRadios = document.querySelectorAll('input[name="privacyMode"]');
     const thumbSizeInput = document.getElementById('thumbSize');
     const thumbSizeValue = document.getElementById('thumbSizeValue');
     const backendUrlInput = document.getElementById('backendUrl');
@@ -17,11 +18,16 @@ document.addEventListener('DOMContentLoaded', () => {
         enabled: true,
         position: 'left',
         thumbSize: 120,
+        privacyMode: 'strict',
         backendUrl: '',
         searxngUrls: []
     }, (items) => {
         enabledToggle.checked = items.enabled;
         positionRadios.forEach(r => { r.checked = (r.value === items.position); });
+        // Migrate old 'standard' value → 'favicons' (renamed for clarity)
+        const privacyValue = items.privacyMode === 'standard' ? 'favicons'
+            : (items.privacyMode === 'favicons' ? 'favicons' : 'strict');
+        privacyRadios.forEach(r => { r.checked = (r.value === privacyValue); });
         thumbSizeInput.value = items.thumbSize;
         thumbSizeValue.textContent = items.thumbSize;
         backendUrlInput.value = items.backendUrl || '';
@@ -148,10 +154,12 @@ document.addEventListener('DOMContentLoaded', () => {
             }
         }
 
+        const selectedPrivacy = [...privacyRadios].find(r => r.checked)?.value || 'strict';
         chrome.storage.sync.set({
             enabled: enabledToggle.checked,
             position: selectedPosition,
             thumbSize: parseInt(thumbSizeInput.value, 10),
+            privacyMode: selectedPrivacy,
             backendUrl,
             searxngUrls: urls
         }, () => {

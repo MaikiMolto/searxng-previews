@@ -342,6 +342,27 @@
         </div>
     </section>
 
+    <section class="settings-group">
+        <h2>Privacy</h2>
+
+        <div class="form-group">
+            <label>Fallback when preview can't be rendered</label>
+            <div class="radio-group" id="privacyMode">
+                <label><input type="radio" name="privacyMode" value="strict"> Full Privacy (default) &mdash; generic &ldquo;No Preview&rdquo; card</label>
+                <label><input type="radio" name="privacyMode" value="favicons"> Favicons &mdash; show the target site's favicon</label>
+            </div>
+            <small class="hint">
+                When a screenshot can't be generated (bot protection, timeout, login wall), the extension can either show
+                a <strong>generic placeholder card</strong> with a shield icon (no extra request), or the target site's
+                <strong>favicon</strong> via your backend's <code>/favicon</code> proxy &mdash; the backend briefly fetches
+                <code>&lt;site&gt;/favicon.ico</code> on your behalf.
+                <br><br>
+                <strong>Full Privacy</strong> keeps every request inside the extension / backend perimeter.
+                <strong>Favicons</strong> looks nicer &amp; helps you recognize sites at a glance.
+            </small>
+        </div>
+    </section>
+
     <button id="save">Save Settings</button>
     <div id="status"></div>
 

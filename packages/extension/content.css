@@ -90,6 +90,21 @@ article.result:hover .srp-thumb-placeholder.srp-thumb-hover {
   color: #9aa4b2;
 }
 
+/* Favicon fallback (Favicons privacy mode) — large centered icon, no text */
+.srp-thumb-placeholder.srp-thumb-ph-favonly {
+  padding: 4px;
+}
+.srp-thumb-ph-favonly .srp-thumb-ph-favicon {
+  width: 80%;
+  height: 80%;
+  max-width: 96px;
+  max-height: 96px;
+  object-fit: contain;
+  border-radius: 8px;
+  background: transparent;
+  margin: 0;
+}
+
 @media (prefers-color-scheme: dark) {
   .srp-thumb {
     box-shadow: 0 2px 5px rgba(0, 0, 0, 0.4);

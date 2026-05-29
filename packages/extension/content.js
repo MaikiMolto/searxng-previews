@@ -36,17 +36,51 @@
 
   async function loadThumbnail(img) {
     const backendUrl = img.dataset.backendUrl;
+    const domain = img.dataset.domain;
 
+    // Build the fallback shown when a screenshot can't be rendered.
+    // Two modes depending on settings.privacyMode (default 'strict'):
+    //   - 'favicons': target site's favicon via backend /favicon proxy.
+    //     (Backend hits <site>/favicon.ico — target sees backend IP, not
+    //      the user's.) Just the icon, no domain text — cleaner look.
+    //   - 'strict' (default): generic shield card, zero extra requests.
     function showFavicon() {
+      const mode = settings.privacyMode === 'favicons' ? 'favicons' : 'strict';
       const placeholder = document.createElement('div');
       placeholder.className = `srp-thumb srp-thumb-${settings.position} srp-thumb-placeholder`;
       placeholder.style.width = img.style.width;
       placeholder.style.height = img.style.height;
-      placeholder.innerHTML = `
-        <div class="srp-thumb-ph-icon">🛡️</div>
-        <div class="srp-thumb-ph-title">No Preview</div>
-        <div class="srp-thumb-ph-hint">Bot protection / timeout / blocked</div>
-      `;
+
+      if (mode === 'favicons' && domain && settings.backendUrl) {
+        // Favicon mode — load via backend proxy. The <img> onerror handler
+        // degrades to the strict card if the proxy itself fails.
+        // v=2: cache-buster after DDG-fallback rollout (2026-04-22) — invalidates
+        // old SVG-shield responses that were cached for 24h in the browser.
+        const base = settings.backendUrl.replace(/\/+$/, '');
+        const faviconUrl = `${base}/favicon?domain=${encodeURIComponent(domain)}&v=2`;
+        placeholder.classList.add('srp-thumb-ph-favonly');
+        placeholder.innerHTML = `
+          <img class="srp-thumb-ph-favicon" src="${faviconUrl}" alt="" loading="lazy">
+        `;
+        const fav = placeholder.querySelector('img.srp-thumb-ph-favicon');
+        if (fav) {
+          fav.addEventListener('error', () => {
+            placeholder.classList.remove('srp-thumb-ph-favonly');
+            placeholder.innerHTML = `
+              <div class="srp-thumb-ph-icon">🛡️</div>
+              <div class="srp-thumb-ph-title">No Preview</div>
+              <div class="srp-thumb-ph-hint">Bot protection / timeout / blocked</div>
+            `;
+          });
+        }
+      } else {
+        // Strict: no external favicon request at all
+        placeholder.innerHTML = `
+          <div class="srp-thumb-ph-icon">🛡️</div>
+          <div class="srp-thumb-ph-title">No Preview</div>
+          <div class="srp-thumb-ph-hint">Bot protection / timeout / blocked</div>
+        `;
+      }
       img.replaceWith(placeholder);
     }
 
@@ -138,6 +172,7 @@
     img.style.transition = 'opacity 0.3s ease-in-out';
 
     img.dataset.backendUrl = `${settings.backendUrl}/preview?url=${encodeURIComponent(resultUrl)}&width=${pixelWidth}&format=webp`;
+    img.dataset.domain = domain;
 
     const container = resultElement.querySelector('h3') || resultElement.firstChild;
 
