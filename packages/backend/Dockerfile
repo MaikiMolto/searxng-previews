@@ -30,7 +30,7 @@ WORKDIR /app
 COPY package*.json ./
 
 # Install dependencies
-RUN npm ci --only=production
+RUN npm ci --omit=dev
 
 # Install Playwright Chromium
 RUN npx playwright install chromium
