@@ -256,7 +256,7 @@ MIT License — see [LICENSE](LICENSE) for details.
 
 ## 👥 Credits
 
-**Built by [Maik](https://github.com/MaikiMolto) & Nex** 🤜🤛
+**Built by [MaikiMolto](https://github.com/MaikiMolto) & Nex** 🤜🤛
 
 Powered by [Playwright](https://playwright.dev/), [Sharp](https://sharp.pixelplumbing.com/), [Fastify](https://fastify.dev/), and way too much coffee.
 
