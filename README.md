@@ -1,5 +1,6 @@
 # SearXNG Result Previews 🖼️
 
+[![Chrome Web Store](https://img.shields.io/chrome-web-store/v/kgnammgkaglbkkkjmjnnhfndneandhim?style=flat-square&label=Chrome%20Web%20Store&logo=googlechrome&logoColor=white&color=4285F4)](https://chromewebstore.google.com/detail/searxng-result-previews/kgnammgkaglbkkkjmjnnhfndneandhim)
 [![Latest Release](https://img.shields.io/github/v/release/MaikiMolto/searxng-previews?style=flat-square)](https://github.com/MaikiMolto/searxng-previews/releases)
 [![License](https://img.shields.io/github/license/MaikiMolto/searxng-previews?style=flat-square)](LICENSE)
 [![Docker](https://img.shields.io/badge/ghcr.io-maikimolto%2Fsearxng--previews-2496ed?style=flat-square&logo=docker&logoColor=white)](https://github.com/MaikiMolto/searxng-previews/pkgs/container/searxng-previews)
