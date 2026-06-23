@@ -9,6 +9,8 @@
 
 > Self-hosted thumbnail previews for your SearXNG search results. No external services, no tracking — just fast screenshots from your own server.
 
+**🧩 Now on the [Chrome Web Store](https://chromewebstore.google.com/detail/searxng-result-previews/kgnammgkaglbkkkjmjnnhfndneandhim)** — one-click install for Chrome, Edge, Brave, Vivaldi & other Chromium browsers. _(Still needs the self-hosted [backend](#-quick-start) to work.)_
+
 ![Search Results with Previews](docs/screenshots/search-results.jpg)
 
 ## ✨ Features
@@ -141,6 +143,16 @@ docker compose -f docker-compose.full.yml up -d
 | SearXNG (full stack only) | `http://<your-ip>:8080` | Search Engine |
 
 ### 2. Browser Extension
+
+**Option A — Chrome Web Store (recommended)** 🧩
+
+One-click install for Chrome, Edge, Brave, Vivaldi and other Chromium browsers:
+
+👉 **[Get SearXNG Result Previews on the Chrome Web Store](https://chromewebstore.google.com/detail/searxng-result-previews/kgnammgkaglbkkkjmjnnhfndneandhim)**
+
+After installing, the settings page opens automatically — enter your backend URL and SearXNG instance URL(s).
+
+**Option B — Manual install (load unpacked / for development)**
 
 1. Download the latest `.zip` from the [Releases page](https://github.com/MaikiMolto/searxng-previews/releases)
 2. Open `chrome://extensions` (or your browser's equivalent)
